@@ -1,6 +1,6 @@
-import { decodeBase64 } from "https://deno.land/std@0.220.1/encoding/base64.ts";
-import { getLogger, setup, ConsoleHandler } from "https://deno.land/std@0.220.1/log/mod.ts";
-import { load } from "https://deno.land/std@0.220.1/dotenv/mod.ts";
+import { decodeBase64 } from "jsr:@std/encoding/base64";
+import { getLogger, setup, ConsoleHandler } from "jsr:@std/log";
+import { load } from "jsr:@std/dotenv";
 
 await load({ export: true });
 

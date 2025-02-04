@@ -6,10 +6,16 @@
     "jsr:@std/assert@1": "1.0.11",
     "jsr:@std/assert@~0.218.2": "0.218.2",
     "jsr:@std/bytes@~0.218.2": "0.218.2",
+    "jsr:@std/dotenv@*": "0.225.3",
+    "jsr:@std/encoding@*": "1.0.7",
+    "jsr:@std/fmt@^1.0.5": "1.0.5",
     "jsr:@std/fmt@~0.218.2": "0.218.2",
+    "jsr:@std/fs@^1.0.11": "1.0.11",
     "jsr:@std/fs@~0.218.2": "0.218.2",
     "jsr:@std/internal@^1.0.5": "1.0.5",
     "jsr:@std/io@~0.218.2": "0.218.2",
+    "jsr:@std/io@~0.225.2": "0.225.2",
+    "jsr:@std/log@*": "0.224.14",
     "jsr:@std/path@~0.218.2": "0.218.2"
   },
   "jsr": {
@@ -17,9 +23,9 @@
       "integrity": "e87e80a404958f6350d903e6238b72afb92468378b0b32111f7a1e4916ac7fe7",
       "dependencies": [
         "jsr:@deno/graph",
-        "jsr:@std/fmt",
-        "jsr:@std/fs",
-        "jsr:@std/io",
+        "jsr:@std/fmt@~0.218.2",
+        "jsr:@std/fs@~0.218.2",
+        "jsr:@std/io@~0.218.2",
         "jsr:@std/path"
       ]
     },
@@ -38,11 +44,23 @@
     "@std/bytes@0.218.2": {
       "integrity": "91fe54b232dcca73856b79a817247f4a651dbb60d51baafafb6408c137241670"
     },
+    "@std/dotenv@0.225.3": {
+      "integrity": "a95e5b812c27b0854c52acbae215856d9cce9d4bbf774d938c51d212711e8d4a"
+    },
+    "@std/encoding@1.0.7": {
+      "integrity": "f631247c1698fef289f2de9e2a33d571e46133b38d042905e3eac3715030a82d"
+    },
     "@std/fmt@0.218.2": {
       "integrity": "99526449d2505aa758b6cbef81e7dd471d8b28ec0dcb1491d122b284c548788a"
     },
+    "@std/fmt@1.0.5": {
+      "integrity": "0cfab43364bc36650d83c425cd6d99910fc20c4576631149f0f987eddede1a4d"
+    },
     "@std/fs@0.218.2": {
       "integrity": "dd9431453f7282e8c577cc22c9e6d036055a9a980b5549f887d6012969fabcca"
+    },
+    "@std/fs@1.0.11": {
+      "integrity": "ba674672693340c5ebdd018b4fe1af46cb08741f42b4c538154e97d217b55bdd"
     },
     "@std/internal@1.0.5": {
       "integrity": "54a546004f769c1ac9e025abd15a76b6671ddc9687e2313b67376125650dc7ba"
@@ -52,6 +70,17 @@
       "dependencies": [
         "jsr:@std/assert@~0.218.2",
         "jsr:@std/bytes"
+      ]
+    },
+    "@std/io@0.225.2": {
+      "integrity": "3c740cd4ee4c082e6cfc86458f47e2ab7cb353dc6234d5e9b1f91a2de5f4d6c7"
+    },
+    "@std/log@0.224.14": {
+      "integrity": "257f7adceee3b53bb2bc86c7242e7d1bc59729e57d4981c4a7e5b876c808f05e",
+      "dependencies": [
+        "jsr:@std/fmt@^1.0.5",
+        "jsr:@std/fs@^1.0.11",
+        "jsr:@std/io@~0.225.2"
       ]
     },
     "@std/path@0.218.2": {
