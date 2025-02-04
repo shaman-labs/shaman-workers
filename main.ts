@@ -1,5 +1,8 @@
 import { decodeBase64 } from "https://deno.land/std@0.220.1/encoding/base64.ts";
 import { getLogger, setup, ConsoleHandler } from "https://deno.land/std@0.220.1/log/mod.ts";
+import { load } from "https://deno.land/std@0.220.1/dotenv/mod.ts";
+
+await load({ export: true });
 
 // Configure logging
 setup({
@@ -31,7 +34,9 @@ interface IpfsRequest {
   hash: string;
 }
 
-const IPFS_GATEWAY = "https://ipfs.io/ipfs/";
+// Get IPFS gateway from environment variable or use default
+const IPFS_GATEWAY = Deno.env.get("IPFS_GATEWAY") ?? "https://ipfs.io/ipfs/";
+logger.info(`Using IPFS Gateway: ${IPFS_GATEWAY}`);
 
 function decodeCode(str: string): string {
   const bytes = decodeBase64(str);
@@ -73,6 +78,7 @@ async function handleRequest(request: Request): Promise<Response> {
       body = await request.json();
     } catch (e) {
       logger.error("Failed to parse request body");
+      logger.error(e);
       return new Response('Invalid JSON body', { status: 400 });
     }
 
