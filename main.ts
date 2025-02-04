@@ -47,18 +47,24 @@ async function executeCode(code: string): Promise<unknown> {
   try {
     logger.debug("Preparing to execute code");
     
-    // Create a data URL containing the TypeScript code
-    const dataUrl = `data:application/typescript;base64,${btoa(code)}`;
-    
-    const context: ShamanContext = {
-      fetch,
-    };
+    // Create a blob URL from the TypeScript code
+    const blob = new Blob([code], { type: 'application/typescript' });
+    const url = URL.createObjectURL(blob);
 
-    logger.debug("Importing and executing shaman code");
-    const { default: shamanFunction } = await import(dataUrl);
-    const result = await shamanFunction(context);
-    logger.debug("Code execution completed successfully");
-    return result;
+    try {
+      const context: ShamanContext = {
+        fetch,
+      };
+
+      logger.debug("Importing and executing shaman code");
+      const { default: shamanFunction } = await import(url);
+      const result = await shamanFunction(context);
+      logger.debug("Code execution completed successfully");
+      return result;
+    } finally {
+      // Clean up the blob URL
+      URL.revokeObjectURL(url);
+    }
   } catch (error) {
     logger.error("Error executing code:", error);
     throw error;
