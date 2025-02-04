@@ -38,6 +38,8 @@ interface IpfsRequest {
 const IPFS_GATEWAY = Deno.env.get("IPFS_GATEWAY") ?? "https://ipfs.io/ipfs/";
 logger.info(`Using IPFS Gateway: ${IPFS_GATEWAY}`);
 
+const SEPARATOR = "=".repeat(80);
+
 function decodeCode(str: string): string {
   const bytes = decodeBase64(str);
   return new TextDecoder().decode(bytes);
@@ -46,25 +48,20 @@ function decodeCode(str: string): string {
 async function executeCode(code: string): Promise<unknown> {
   try {
     logger.debug("Preparing to execute code");
-    
-    // Create a blob URL from the TypeScript code
-    const blob = new Blob([code], { type: 'application/typescript' });
-    const url = URL.createObjectURL(blob);
 
-    try {
-      const context: ShamanContext = {
-        fetch,
-      };
+    // Create a data URL with the TypeScript code
+    const dataUrl = `data:application/typescript;base64,${btoa(code)}`;
+    logger.debug(`Data URL:\n${SEPARATOR}\n${dataUrl}\n${SEPARATOR}`);
 
-      logger.debug("Importing and executing shaman code");
-      const { default: shamanFunction } = await import(url);
-      const result = await shamanFunction(context);
-      logger.debug("Code execution completed successfully");
-      return result;
-    } finally {
-      // Clean up the blob URL
-      URL.revokeObjectURL(url);
-    }
+    const context: ShamanContext = {
+      fetch,
+    };
+
+    logger.debug("Importing and executing shaman code");
+    const { default: shamanFunction } = await import(dataUrl);
+    const result = await shamanFunction(context);
+    logger.debug("Code execution completed successfully");
+    return result;
   } catch (error) {
     logger.error("Error executing code:", error);
     throw error;
@@ -110,6 +107,7 @@ async function handleRequest(request: Request): Promise<Response> {
 
     const decodedCode = decodeCode(metadata.code);
     logger.debug("Successfully decoded base64 code");
+    logger.debug(`Decoded code:\n${SEPARATOR}\n${decodedCode}\n${SEPARATOR}`);
 
     // Execute the code
     logger.info("Executing shaman code");
