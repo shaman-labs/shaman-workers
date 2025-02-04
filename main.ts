@@ -44,23 +44,24 @@ function decodeCode(str: string): string {
 }
 
 async function executeCode(code: string): Promise<unknown> {
-  const tempFile = await Deno.makeTempFile({ suffix: '.ts' });
-  logger.debug(`Created temporary file: ${tempFile}`);
-  await Deno.writeTextFile(tempFile, code);
-
   try {
+    logger.debug("Preparing to execute code");
+    
+    // Create a data URL containing the TypeScript code
+    const dataUrl = `data:application/typescript;base64,${btoa(code)}`;
+    
     const context: ShamanContext = {
       fetch,
     };
 
     logger.debug("Importing and executing shaman code");
-    const { default: shamanFunction } = await import(`file://${tempFile}`);
+    const { default: shamanFunction } = await import(dataUrl);
     const result = await shamanFunction(context);
     logger.debug("Code execution completed successfully");
     return result;
-  } finally {
-    await Deno.remove(tempFile);
-    logger.debug(`Cleaned up temporary file: ${tempFile}`);
+  } catch (error) {
+    logger.error("Error executing code:", error);
+    throw error;
   }
 }
 
