@@ -37,6 +37,8 @@ interface IpfsRequest {
   hash: string;
 }
 
+const PORT = Number(Deno.env.get("PORT") ?? 8000);
+logger.info(`Using PORT: ${PORT}`);
 // Get IPFS gateway from environment variable or use default
 const IPFS_GATEWAY = Deno.env.get("IPFS_GATEWAY") ?? "https://ipfs.io/ipfs/";
 logger.info(`Using IPFS Gateway: ${IPFS_GATEWAY}`);
@@ -140,5 +142,4 @@ async function handleRequest(request: Request): Promise<Response> {
 }
 
 // Start the server
-logger.info("Server starting on http://localhost:8000");
-Deno.serve({ port: 8000 }, handleRequest);
+Deno.serve({ port: PORT }, handleRequest);

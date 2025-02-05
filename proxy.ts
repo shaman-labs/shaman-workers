@@ -23,11 +23,14 @@ setup({
 const logger = getLogger();
 logger.info("Starting IPFS proxy server...");
 
+// Get PORT from environment variable or use default
+const PORT = Number(Deno.env.get("PORT") ?? 3001);
+logger.info(`Using PORT: ${PORT}`);
 // Get IPFS gateway from environment variable or use default
 const IPFS_GATEWAY = Deno.env.get("IPFS_GATEWAY") ?? "https://ipfs.io/ipfs/";
 logger.info(`Using IPFS Gateway: ${IPFS_GATEWAY}`);
 
-Deno.serve({ port: 3001 }, async (req) => {
+Deno.serve({ port: PORT }, async (req) => {
   const requestId = crypto.randomUUID();
   logger.debug(`[${requestId}] New request received: ${req.method} ${req.url}`);
 
