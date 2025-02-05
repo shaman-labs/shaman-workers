@@ -1,1 +1,1 @@
-web: deno run --allow-net --allow-import --allow-read --allow-env main.ts
+web: deno run --allow-net=:${PORT} --allow-import --allow-read --allow-env main.ts
