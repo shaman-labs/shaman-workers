@@ -1,0 +1,1 @@
+web: deno run --allow-net --allow-import --allow-read --allow-env main.ts
