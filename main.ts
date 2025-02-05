@@ -47,6 +47,9 @@ async function executeCode(code: string): Promise<unknown> {
   try {
     logger.debug("Preparing to execute code");
 
+    // test hello world
+    await import('https://docs.deno.com/examples/scripts/hello_world.ts');
+
     const context: ShamanContext = {
       fetch,
     };
