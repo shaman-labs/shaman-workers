@@ -1,4 +1,3 @@
-import { decodeBase64 } from "jsr:@std/encoding/base64";
 import { getLogger, setup, ConsoleHandler } from "jsr:@std/log";
 import { load } from "jsr:@std/dotenv";
 
@@ -7,7 +6,11 @@ await load({ export: true });
 // Configure logging
 setup({
   handlers: {
-    console: new ConsoleHandler("DEBUG"),
+    console: new ConsoleHandler("DEBUG", {
+      formatter: (record) => {
+        return `[${record.levelName}] ${record.msg}`;
+      }
+    }),
   },
   loggers: {
     default: {
@@ -37,28 +40,25 @@ interface IpfsRequest {
 // Get IPFS gateway from environment variable or use default
 const IPFS_GATEWAY = Deno.env.get("IPFS_GATEWAY") ?? "https://ipfs.io/ipfs/";
 logger.info(`Using IPFS Gateway: ${IPFS_GATEWAY}`);
-
-const SEPARATOR = "=".repeat(80);
-
-function decodeCode(str: string): string {
-  const bytes = decodeBase64(str);
-  return new TextDecoder().decode(bytes);
-}
+const codeProxy = Deno.env.get("IPFS_CODE_PROXY");
+logger.info(`Using IPFS Code Proxy: ${codeProxy}`);
 
 async function executeCode(code: string): Promise<unknown> {
   try {
     logger.debug("Preparing to execute code");
 
-    // Create a data URL with the TypeScript code
-    const dataUrl = `data:application/typescript;base64,${btoa(code)}`;
-    logger.debug(`Data URL:\n${SEPARATOR}\n${dataUrl}\n${SEPARATOR}`);
-
     const context: ShamanContext = {
       fetch,
     };
 
-    logger.debug("Importing and executing shaman code");
-    const { default: shamanFunction } = await import(dataUrl);
+    if (!codeProxy) {
+      throw new Error("IPFS_CODE_PROXY environment variable is not set");
+    }
+
+    // Import and execute the shaman function
+    const codeProxyUrl = `${codeProxy}${code}`;
+    logger.debug(`Importing code from: ${codeProxyUrl}`);
+    const { default: shamanFunction } = await import(codeProxyUrl);
     const result = await shamanFunction(context);
     logger.debug("Code execution completed successfully");
     return result;
@@ -105,13 +105,9 @@ async function handleRequest(request: Request): Promise<Response> {
     const metadata: ShamanMetadata = await response.json();
     logger.info(`Processing shaman: ${metadata.shamanName}`);
 
-    const decodedCode = decodeCode(metadata.code);
-    logger.debug("Successfully decoded base64 code");
-    logger.debug(`Decoded code:\n${SEPARATOR}\n${decodedCode}\n${SEPARATOR}`);
-
-    // Execute the code
+    // Execute the code directly from IPFS
     logger.info("Executing shaman code");
-    const result = await executeCode(decodedCode);
+    const result = await executeCode(metadata.code);
     logger.info("Shaman execution completed");
 
     // Return the complete response
@@ -119,7 +115,7 @@ async function handleRequest(request: Request): Promise<Response> {
       shamanName: metadata.shamanName,
       prompt: metadata.prompt,
       createdAt: metadata.createdAt,
-      decodedCode,
+      code: metadata.code,
       result
     }), {
       headers: {

@@ -26,19 +26,28 @@ Available variables:
 
 ## Running the Server
 
+### Local Development
+
 ```bash
 # Using environment variables from .env file
-deno run --allow-net --allow-read --allow-write --allow-env main.ts
+deno run --allow-net --allow-read --allow-env main.ts
 
 # Or override with custom IPFS gateway
-IPFS_GATEWAY=https://your-gateway.com/ipfs/ deno run --allow-net --allow-read --allow-write --allow-env main.ts
+IPFS_GATEWAY=https://your-gateway.com/ipfs/ deno run --allow-net --allow-read --allow-env main.ts
 ```
 
 Required permissions:
 - `--allow-net`: For HTTP server and IPFS gateway access
-- `--allow-read`: For reading .env file
-- `--allow-write`: For temporary file operations
+- `--allow-read`: For reading .env file (local development only)
 - `--allow-env`: For environment variable access
+
+### Deployment
+
+This server is compatible with [Deno Deploy](https://deno.com/deploy). You can deploy it directly from your GitHub repository or using the Deno Deploy CLI.
+
+When deploying, make sure to:
+1. Set your environment variables in the Deno Deploy dashboard
+2. No additional permissions are needed for deployment
 
 ## API Usage
 
@@ -60,11 +69,32 @@ curl -X POST http://localhost:8000 \
 #### Response
 ```json
 {
-  "shamanName": "Example Shaman",
-  "prompt": "The original prompt",
-  "createdAt": "2024-03-21T12:00:00Z",
-  "decodedCode": "// The decoded TypeScript code",
-  "result": "The execution result"
+  "shamanName": "Fetch ETH",
+  "prompt": "Fetch ETH Price",
+  "createdAt": "2025-02-04T23:23:08.887Z",
+  "code": "CID",
+  "result": {
+    "ethPrice": 2500.50
+  }
+}
+```
+
+The IPFS metadata format is:
+```json
+{
+  "shamanName": "Fetch ETH",
+  "prompt": "Fetch ETH Price",
+  "code": "QmVVEHkTDc7LBzp61MmgNXPSwkj4Qr82CsCL1s6MPkfEqx",
+  "createdAt": "2025-02-04T23:23:08.887Z"
+}
+```
+
+The code at the IPFS hash should be a TypeScript function with the following format:
+```typescript
+export default async (context: ShamanContext) => {
+  const { fetch } = context;
+  // Your code here
+  return result;
 }
 ```
 
