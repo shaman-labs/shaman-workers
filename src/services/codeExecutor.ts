@@ -1,0 +1,38 @@
+import { decodeBase64 } from "jsr:@std/encoding/base64";
+import { logger } from "../config/logger.ts";
+import { ShamanContext } from "../types/shaman.ts";
+import { publicClient } from "./evm.ts";
+
+const SEPARATOR = "=".repeat(80);
+
+function decodeCode(str: string): string {
+  const bytes = decodeBase64(str);
+  return new TextDecoder().decode(bytes);
+}
+
+export async function executeCode(code: string): Promise<unknown> {
+  try {
+    logger.debug("Preparing to execute code");
+
+    // First decode the base64 code
+    const decodedCode = decodeCode(code);
+    
+    // Create a data URL with the decoded TypeScript code
+    const dataUrl = `data:application/typescript,${encodeURIComponent(decodedCode)}`;
+    logger.debug(`Data URL:\n${SEPARATOR}\n${dataUrl}\n${SEPARATOR}`);
+
+    const context: ShamanContext = {
+      fetch,
+      publicClient,
+    };
+
+    logger.debug("Importing and executing shaman code");
+    const { default: shamanFunction } = await import(dataUrl);
+    const result = await shamanFunction(context);
+    logger.debug("Code execution completed successfully");
+    return result;
+  } catch (error) {
+    logger.error("Error executing code:", error);
+    throw error;
+  }
+} 
