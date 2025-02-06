@@ -1,16 +1,16 @@
 {
   "tasks": {
-    "dev": "deno run --watch main.ts",
-    "proxy": "deno run --watch proxy.ts"
+    "dev": "deno run --watch src/main.ts"
   },
   "imports": {
     "@std/assert": "jsr:@std/assert@1",
-    "@std/http": "jsr:@std/http@1"
+    "@std/http": "jsr:@std/http@1",
+    "viem": "npm:viem@^2.22.22"
   },
   "deploy": {
     "project": "75218963-eedf-4471-9618-df76cbc51966",
     "exclude": ["**/node_modules"],
     "include": [],
-    "entrypoint": "main.ts"
+    "entrypoint": "src/main.ts"
   }
 }
