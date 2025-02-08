@@ -40,11 +40,10 @@ export interface ShamanRequest {
 }
 
 export interface ExecutionResult {
-  shamanId: Hex;
-  prompt: string;
-  createdAt: string;
-  decodedCode: string;
+  success: boolean;
+  decodedCode?: string;
   result: unknown;
+  timestamp: number;
 }
 
 export interface Transaction {
