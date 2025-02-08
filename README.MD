@@ -4,21 +4,26 @@ A Deno server that executes Shaman code from IPFS metadata.
 
 ## Environment Variables
 
-Environment variables can be set either through the system environment or using a `.env` file in the project root.
+Environment variables can be set either through the system environment or using
+a `.env` file in the project root.
 
 1. Create a `.env` file by copying the example:
+
 ```bash
 cp .env.example .env
 ```
 
 2. Configure your environment variables in `.env`:
+
 ```env
 # IPFS Gateway URL (include trailing slash)
 IPFS_GATEWAY=https://ipfs.io/ipfs/
 ```
 
 Available variables:
-- `IPFS_GATEWAY`: The IPFS gateway URL to use for fetching metadata (default: "https://ipfs.io/ipfs/")
+
+- `IPFS_GATEWAY`: The IPFS gateway URL to use for fetching metadata (default:
+  "https://ipfs.io/ipfs/")
   - Example alternative gateways:
     - `https://ipfs.io/ipfs/`
     - `https://cloudflare-ipfs.com/ipfs/`
@@ -37,15 +42,18 @@ IPFS_GATEWAY=https://your-gateway.com/ipfs/ deno run --allow-net --allow-read --
 ```
 
 Required permissions:
+
 - `--allow-net`: For HTTP server and IPFS gateway access
 - `--allow-read`: For reading .env file (local development only)
 - `--allow-env`: For environment variable access
 
 ### Deployment
 
-This server is compatible with [Deno Deploy](https://deno.com/deploy). You can deploy it directly from your GitHub repository or using the Deno Deploy CLI.
+This server is compatible with [Deno Deploy](https://deno.com/deploy). You can
+deploy it directly from your GitHub repository or using the Deno Deploy CLI.
 
 When deploying, make sure to:
+
 1. Set your environment variables in the Deno Deploy dashboard
 2. No additional permissions are needed for deployment
 
@@ -60,6 +68,7 @@ curl -X POST http://localhost:8000 \
 ```
 
 #### Request Body
+
 ```json
 {
   "hash": "Qmc1DQXPvK8BbBpnqt2RTmHYSKNDAx3evozK2GMX7DQ85b"
@@ -67,6 +76,7 @@ curl -X POST http://localhost:8000 \
 ```
 
 #### Response
+
 ```json
 {
   "shamanName": "Fetch ETH",
@@ -80,6 +90,7 @@ curl -X POST http://localhost:8000 \
 ```
 
 The IPFS metadata format is:
+
 ```json
 {
   "shamanName": "Fetch ETH",
@@ -89,16 +100,19 @@ The IPFS metadata format is:
 }
 ```
 
-The code at the IPFS hash should be a TypeScript function with the following format:
+The code at the IPFS hash should be a TypeScript function with the following
+format:
+
 ```typescript
 export default async (context: ShamanContext) => {
   const { fetch } = context;
   // Your code here
   return result;
-}
+};
 ```
 
 #### Error Responses
+
 - `400 Bad Request`: Invalid JSON body or missing hash
 - `405 Method Not Allowed`: Non-POST request
 - `502 Bad Gateway`: Failed to fetch IPFS metadata
@@ -111,19 +125,22 @@ export default async (context: ShamanContext) => {
 ## Setup
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/jcurbelo/shaman-workers.git
 cd shaman-workers
 ```
 
 2. Install dependencies:
+
 ```bash
 deno cache main.ts
 ```
 
 ## Development
 
-This project uses Deno for TypeScript runtime. Configuration can be found in `deno.json`.
+This project uses Deno for TypeScript runtime. Configuration can be found in
+`deno.json`.
 
 ## License
 

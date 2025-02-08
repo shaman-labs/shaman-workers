@@ -1,4 +1,11 @@
-import { encodeFunctionData, formatEther, Hex, parseEther, parseUnits, PublicClient } from "viem";
+import {
+  encodeFunctionData,
+  formatEther,
+  Hex,
+  parseEther,
+  parseUnits,
+  PublicClient,
+} from "viem";
 import { createServerClient } from "../services/privy.ts";
 
 export interface ShamanMetadata {
