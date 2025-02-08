@@ -1,8 +1,11 @@
 import { initializeLogger, logger } from "./config/logger.ts";
 import { PORT, IPFS_GATEWAY } from "./config/env.ts";
 import { executeCode } from "./services/codeExecutor.ts";
-import { IpfsRequest, ShamanMetadata, ExecutionResult } from "./types/shaman.ts";
+import { IpfsRequest, ShamanMetadata, ExecutionResult, ShamanContext } from "./types/shaman.ts";
 import { decodeBase64 } from "jsr:@std/encoding/base64";
+import { createServerClient } from "./services/privy.ts";
+import { publicClient } from "./services/evm.ts";
+import { encodeFunctionData, formatEther, parseEther, parseUnits } from "viem";
 
 // Initialize logger
 initializeLogger();
@@ -44,9 +47,20 @@ async function handleRequest(request: Request): Promise<Response> {
     const metadata: ShamanMetadata = await response.json();
     logger.info(`Processing shaman: ${metadata.shamanName}`);
 
+    const context: ShamanContext = {
+      ...metadata,
+      fetch,
+      publicClient,
+      encodeFunctionData,
+      parseEther,
+      parseUnits,
+      formatEther,
+      walletClient: createServerClient(metadata.shamanOwner, metadata.chainId),
+    };
+
     // Execute the code
     logger.info("Executing shaman code");
-    const result = await executeCode(metadata.code);
+    const result = await executeCode(metadata.code, context);
     logger.info("Shaman execution completed");
 
     const executionResult: ExecutionResult = {
