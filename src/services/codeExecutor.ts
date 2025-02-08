@@ -9,12 +9,13 @@ function decodeCode(str: string): string {
   return new TextDecoder().decode(bytes);
 }
 
-export async function executeCode(code: string, context: ShamanContext): Promise<unknown> {
+export async function executeCode(code: string, context: ShamanContext): Promise<{ success: boolean, decodedCode?: string, result: unknown }> {
   try {
     logger.debug("Preparing to execute code");
 
     // First decode the base64 code
     const decodedCode = decodeCode(code);
+    logger.debug(`Decoded code:\n${SEPARATOR}\n${decodedCode}\n${SEPARATOR}`);
 
     // Create a data URL with the decoded TypeScript code
     const dataUrl = `data:application/typescript,${encodeURIComponent(decodedCode)}`;
@@ -24,9 +25,10 @@ export async function executeCode(code: string, context: ShamanContext): Promise
     const { default: shamanFunction } = await import(dataUrl);
     const result = await shamanFunction(context);
     logger.debug("Code execution completed successfully");
-    return result;
+    logger.debug(`Result: ${JSON.stringify(result)}`);
+    return { success: true, decodedCode, result };
   } catch (error) {
     logger.error("Error executing code:", error);
-    throw error;
+    return { success: false, result: error };
   }
 } 

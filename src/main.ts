@@ -1,11 +1,8 @@
 import { initializeLogger, logger } from "./config/logger.ts";
-import { PORT, IPFS_GATEWAY } from "./config/env.ts";
-import { executeCode } from "./services/codeExecutor.ts";
-import { IpfsRequest, ShamanMetadata, ExecutionResult, ShamanContext } from "./types/shaman.ts";
-import { decodeBase64 } from "jsr:@std/encoding/base64";
-import { createServerClient } from "./services/privy.ts";
-import { publicClient } from "./services/evm.ts";
-import { encodeFunctionData, formatEther, parseEther, parseUnits } from "viem";
+import { PORT } from "./config/env.ts";
+import { ShamanRequest } from "./types/shaman.ts";
+import { executeShaman } from "./services/shamans.ts";
+import { isHex } from "viem";
 
 // Initialize logger
 initializeLogger();
@@ -18,8 +15,8 @@ async function handleRequest(request: Request): Promise<Response> {
       return new Response('Method not allowed. Please use POST.', { status: 405 });
     }
 
-    // Parse the request body
-    let body: IpfsRequest;
+    // Request checks
+    let body: ShamanRequest;
     try {
       body = await request.json();
     } catch (e) {
@@ -28,51 +25,19 @@ async function handleRequest(request: Request): Promise<Response> {
       return new Response('Invalid JSON body', { status: 400 });
     }
 
-    if (!body.hash) {
-      logger.warn("Missing IPFS hash in request");
-      return new Response('Missing IPFS hash in request body', { status: 400 });
+    if (!body.shamanId) {
+      logger.warn("Missing shamanId in request");
+      return new Response('Missing shamanId in request body', { status: 400 });
     }
 
-    // Construct IPFS URL
-    const ipfsUrl = `${IPFS_GATEWAY}${body.hash}`;
-    logger.info(`Fetching metadata from IPFS: ${ipfsUrl}`);
-
-    // Fetch and process the metadata
-    const response = await fetch(ipfsUrl);
-    if (!response.ok) {
-      logger.error(`Failed to fetch metadata: ${response.status}`);
-      return new Response(`Failed to fetch metadata: ${response.status}`, { status: 502 });
+    if (!isHex(body.shamanId)) {
+      logger.warn(`Invalid shamanId in request: ${body.shamanId}, expected a hex string`);
+      return new Response(`Invalid shamanId in request: ${body.shamanId}, expected a hex string`, { status: 400 });
     }
 
-    const metadata: ShamanMetadata = await response.json();
-    logger.info(`Processing shaman: ${metadata.shamanName}`);
+    // Execute the shaman
+    const executionResult = await executeShaman(body.shamanId);
 
-    const context: ShamanContext = {
-      ...metadata,
-      fetch,
-      publicClient,
-      encodeFunctionData,
-      parseEther,
-      parseUnits,
-      formatEther,
-      walletClient: createServerClient(metadata.shamanOwner, metadata.chainId),
-    };
-
-    // Execute the code
-    logger.info("Executing shaman code");
-    const result = await executeCode(metadata.code, context);
-    logger.info("Shaman execution completed");
-
-    const executionResult: ExecutionResult = {
-      shamanId: metadata.shamanId,
-      shamanName: metadata.shamanName,
-      prompt: metadata.prompt,
-      createdAt: metadata.createdAt,
-      decodedCode: new TextDecoder().decode(decodeBase64(metadata.code)),
-      result
-    };
-
-    // Return the complete response
     return new Response(JSON.stringify(executionResult), {
       headers: {
         'content-type': 'application/json',
