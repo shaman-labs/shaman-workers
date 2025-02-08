@@ -11,6 +11,16 @@ export const IPFS_GATEWAY = Deno.env.get("IPFS_GATEWAY") ?? "https://ipfs.io/ipf
 logger.info(`Using PORT: ${PORT}`);
 logger.info(`Using IPFS Gateway: ${IPFS_GATEWAY}`);
 
+// Privy Configuration
+export const PRIVY_APP_ID = Deno.env.get("PRIVY_APP_ID") ?? "";
+export const PRIVY_APP_SECRET = Deno.env.get("PRIVY_APP_SECRET") ?? "";
+export const PRIVY_AUTH_PRIVATE_KEY = Deno.env.get("PRIVY_AUTH_PRIVATE_KEY") ?? "";
+
+if (!PRIVY_APP_ID || !PRIVY_APP_SECRET || !PRIVY_AUTH_PRIVATE_KEY) {
+  logger.error("Missing Privy environment variables");
+  Deno.exit(1);
+}
+
 // EVM Configuration
 export const ARB_SEPOLIA_RPC_URL = Deno.env.get("ARB_SEPOLIA_RPC_URL") ?? "https://arbitrum-sepolia-rpc.publicnode.com";
 
