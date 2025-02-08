@@ -2,13 +2,19 @@ import { encodeFunctionData, formatEther, Hex, parseEther, parseUnits, PublicCli
 import { createServerClient } from "../services/privy.ts";
 
 export interface ShamanMetadata {
-  shamanId: string;
-  shamanName: string;
-  shamanOwner: Hex;
+  shamanId: Hex;
   prompt: string;
   code: string;
   createdAt: string;
   chainId: number;
+}
+
+export interface ShamanEntity {
+  shamanId: Hex;
+  shamanCreator: Hex;
+  shamanActive: boolean;
+  shamanBalance: bigint;
+  shamanMetadata: ShamanMetadata;
 }
 
 export interface ShamanContext {
@@ -19,16 +25,15 @@ export interface ShamanContext {
   parseEther: typeof parseEther;
   parseUnits: typeof parseUnits;
   formatEther: typeof formatEther;
-  shamanOwner: Hex;
+  shamanCreator: Hex;
 }
 
-export interface IpfsRequest {
-  hash: string;
+export interface ShamanRequest {
+  shamanId: Hex;
 }
 
 export interface ExecutionResult {
-  shamanId: string;
-  shamanName: string;
+  shamanId: Hex;
   prompt: string;
   createdAt: string;
   decodedCode: string;
