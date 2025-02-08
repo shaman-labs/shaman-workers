@@ -125,7 +125,7 @@ export const executeShaman = async (shamanId: Hex) => {
   logger.info(`Logging operation to database: ${JSON.stringify(result)}`);
   const logHash = await logShamanOperation(
     shamanId,
-    shaman.shamanBalance,
+    1n,
     logMetadataHash,
     result.success,
   );
