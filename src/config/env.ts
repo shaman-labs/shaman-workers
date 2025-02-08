@@ -40,3 +40,12 @@ assertEnv("WORLD_ADDRESS", WORLD_ADDRESS);
 
 // Log EVM configuration
 logger.info(`Using ARB_SEPOLIA_RPC_URL: ${ARB_SEPOLIA_RPC_URL}`);
+
+// Filebase Configuration
+export const S3_KEY = Deno.env.get("S3_KEY") ?? "";
+export const S3_SECRET = Deno.env.get("S3_SECRET") ?? "";
+export const S3_BUCKET = Deno.env.get("S3_BUCKET") ?? "";
+
+assertEnv("S3_KEY", S3_KEY);
+assertEnv("S3_SECRET", S3_SECRET);
+assertEnv("S3_BUCKET", S3_BUCKET);

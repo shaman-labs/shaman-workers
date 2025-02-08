@@ -17,6 +17,7 @@ import { IPFS_GATEWAY } from "../config/env.ts";
 import { operatorAccount, publicClient } from "./evm.ts";
 import { createServerClient } from "./privy.ts";
 import { executeCode } from "./codeExecutor.ts";
+import { uploadOperationLog } from "./filebase.ts";
 
 export const getShamanActive = (shamanId: Hex) =>
   worldContract.read.getShamanActive([shamanId]);
@@ -115,20 +116,24 @@ export const executeShaman = async (shamanId: Hex) => {
   };
 
   const result = await executeCode(shaman.shamanMetadata.code, context);
-  // TODO: store executing on IPFS
+
+  logger.info(`Uploading operation log to IPFS: ${JSON.stringify(result)}`);
+  const { cid: logMetadataHash } = await uploadOperationLog(result);
+  logger.info(`Operation log uploaded to IPFS: ${logMetadataHash}`);
 
   // Log result to database
+  logger.info(`Logging operation to database: ${JSON.stringify(result)}`);
   const logHash = await logShamanOperation(
     shamanId,
     shaman.shamanBalance,
-    "WILL_BE_UPDATED",
+    logMetadataHash,
     result.success,
   );
+  logger.info(`Operation logged to database: ${logHash}`);
 
   return {
-    success: result.success,
-    result: result.result,
-    logMetadataHash: "",
+    ...result,
+    logMetadataHash,
     logHash,
   };
 };
