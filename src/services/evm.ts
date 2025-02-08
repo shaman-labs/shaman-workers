@@ -1,8 +1,7 @@
-import { createPublicClient, createWalletClient, Hex, http } from 'viem';
-import { arbitrumSepolia } from 'viem/chains';
+import { createPublicClient, createWalletClient, Hex, http } from "viem";
+import { arbitrumSepolia } from "viem/chains";
 import { ARB_SEPOLIA_RPC_URL, OPERATOR_PRIVATE_KEY } from "../config/env.ts";
-import { privateKeyToAccount } from 'viem/accounts'
-
+import { privateKeyToAccount } from "viem/accounts";
 
 export const publicClient = createPublicClient({
   chain: arbitrumSepolia,

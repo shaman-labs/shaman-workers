@@ -9,7 +9,10 @@ function decodeCode(str: string): string {
   return new TextDecoder().decode(bytes);
 }
 
-export async function executeCode(code: string, context: ShamanContext): Promise<{ success: boolean, decodedCode?: string, result: unknown }> {
+export async function executeCode(
+  code: string,
+  context: ShamanContext,
+): Promise<{ success: boolean; decodedCode?: string; result: unknown }> {
   try {
     logger.debug("Preparing to execute code");
 
@@ -18,7 +21,9 @@ export async function executeCode(code: string, context: ShamanContext): Promise
     logger.debug(`Decoded code:\n${SEPARATOR}\n${decodedCode}\n${SEPARATOR}`);
 
     // Create a data URL with the decoded TypeScript code
-    const dataUrl = `data:application/typescript,${encodeURIComponent(decodedCode)}`;
+    const dataUrl = `data:application/typescript,${
+      encodeURIComponent(decodedCode)
+    }`;
     logger.debug(`Data URL:\n${SEPARATOR}\n${dataUrl}\n${SEPARATOR}`);
 
     logger.debug("Importing and executing shaman code");
@@ -31,4 +36,4 @@ export async function executeCode(code: string, context: ShamanContext): Promise
     logger.error("Error executing code:", error);
     return { success: false, result: error };
   }
-} 
+}

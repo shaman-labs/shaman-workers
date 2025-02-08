@@ -1,4 +1,4 @@
-import { getLogger, setup, ConsoleHandler } from "jsr:@std/log";
+import { ConsoleHandler, getLogger, setup } from "jsr:@std/log";
 
 // Configure logging
 export function initializeLogger() {
@@ -7,7 +7,7 @@ export function initializeLogger() {
       console: new ConsoleHandler("DEBUG", {
         formatter: (record) => {
           return `[${record.levelName}] ${record.msg}`;
-        }
+        },
       }),
     },
     loggers: {
@@ -19,4 +19,4 @@ export function initializeLogger() {
   });
 }
 
-export const logger = getLogger(); 
+export const logger = getLogger();

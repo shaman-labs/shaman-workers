@@ -12,7 +12,8 @@ const assertEnv = (name: string, value: string) => {
 
 // Environment variables
 export const PORT = Number(Deno.env.get("PORT") ?? 8000);
-export const IPFS_GATEWAY = Deno.env.get("IPFS_GATEWAY") ?? "https://ipfs.io/ipfs/";
+export const IPFS_GATEWAY = Deno.env.get("IPFS_GATEWAY") ??
+  "https://ipfs.io/ipfs/";
 
 // Log configuration
 logger.info(`Using PORT: ${PORT}`);
@@ -21,7 +22,8 @@ logger.info(`Using IPFS Gateway: ${IPFS_GATEWAY}`);
 // Privy Configuration
 export const PRIVY_APP_ID = Deno.env.get("PRIVY_APP_ID") ?? "";
 export const PRIVY_APP_SECRET = Deno.env.get("PRIVY_APP_SECRET") ?? "";
-export const PRIVY_AUTH_PRIVATE_KEY = Deno.env.get("PRIVY_AUTH_PRIVATE_KEY") ?? "";
+export const PRIVY_AUTH_PRIVATE_KEY = Deno.env.get("PRIVY_AUTH_PRIVATE_KEY") ??
+  "";
 
 assertEnv("PRIVY_APP_ID", PRIVY_APP_ID);
 assertEnv("PRIVY_APP_SECRET", PRIVY_APP_SECRET);
@@ -29,7 +31,8 @@ assertEnv("PRIVY_AUTH_PRIVATE_KEY", PRIVY_AUTH_PRIVATE_KEY);
 
 // EVM Configuration
 export const OPERATOR_PRIVATE_KEY = Deno.env.get("OPERATOR_PRIVATE_KEY") ?? "";
-export const ARB_SEPOLIA_RPC_URL = Deno.env.get("ARB_SEPOLIA_RPC_URL") ?? "https://arbitrum-sepolia-rpc.publicnode.com";
+export const ARB_SEPOLIA_RPC_URL = Deno.env.get("ARB_SEPOLIA_RPC_URL") ??
+  "https://arbitrum-sepolia-rpc.publicnode.com";
 export const WORLD_ADDRESS = Deno.env.get("WORLD_ADDRESS") ?? "";
 
 assertEnv("OPERATOR_PRIVATE_KEY", OPERATOR_PRIVATE_KEY);
