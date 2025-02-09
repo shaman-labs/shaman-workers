@@ -7,24 +7,26 @@ import { isHex } from "viem";
 // Initialize logger
 initializeLogger();
 
+// Define CORS headers
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
 async function handleRequest(request: Request): Promise<Response> {
   try {
-    // Set CORS headers
-    const headers = new Headers({
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    });
-
     // Handle preflight requests (OPTIONS)
     if (request.method === "OPTIONS") {
-      return new Response(null, { headers });
+      return new Response(null, { headers: new Headers(corsHeaders) });
     }
+
     // Only accept POST requests
     if (request.method !== "POST") {
       logger.warn(`Invalid method: ${request.method}`);
       return new Response("Method not allowed. Please use POST.", {
         status: 405,
+        headers: new Headers(corsHeaders),
       });
     }
 
@@ -35,12 +37,18 @@ async function handleRequest(request: Request): Promise<Response> {
     } catch (e) {
       logger.error("Failed to parse request body");
       logger.error(e);
-      return new Response("Invalid JSON body", { status: 400 });
+      return new Response("Invalid JSON body", {
+        status: 400,
+        headers: new Headers(corsHeaders),
+      });
     }
 
     if (!body.shamanId) {
       logger.warn("Missing shamanId in request");
-      return new Response("Missing shamanId in request body", { status: 400 });
+      return new Response("Missing shamanId in request body", {
+        status: 400,
+        headers: new Headers(corsHeaders),
+      });
     }
 
     if (!isHex(body.shamanId)) {
@@ -49,17 +57,22 @@ async function handleRequest(request: Request): Promise<Response> {
       );
       return new Response(
         `Invalid shamanId in request: ${body.shamanId}, expected a hex string`,
-        { status: 400 },
+        {
+          status: 400,
+          headers: new Headers(corsHeaders),
+        },
       );
     }
 
     // Execute the shaman
     const executionResult = await executeShaman(body.shamanId);
 
+    // Return successful response with CORS headers
     return new Response(JSON.stringify(executionResult), {
-      headers: {
+      headers: new Headers({
+        ...corsHeaders,
         "content-type": "application/json",
-      },
+      }),
     });
   } catch (error: unknown) {
     logger.error(
@@ -75,9 +88,10 @@ async function handleRequest(request: Request): Promise<Response> {
       }),
       {
         status: 500,
-        headers: {
+        headers: new Headers({
+          ...corsHeaders,
           "content-type": "application/json",
-        },
+        }),
       },
     );
   }
