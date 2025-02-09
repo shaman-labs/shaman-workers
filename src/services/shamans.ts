@@ -17,7 +17,7 @@ import { IPFS_GATEWAY } from "../config/env.ts";
 import { operatorAccount, publicClient } from "./evm.ts";
 import { createServerClient } from "./privy.ts";
 import { executeCode } from "./codeExecutor.ts";
-import { uploadOperationLog } from "./filebase.ts";
+import { upload } from "./filebase.ts";
 
 export const getShamanActive = (shamanId: Hex) =>
   worldContract.read.getShamanActive([shamanId]);
@@ -101,11 +101,11 @@ export const executeShaman = async (shamanId: Hex) => {
 
   const serverClient = createServerClient(
     shaman.shamanCreator,
-    shaman.shamanMetadata.chainId,
+    arbitrumSepolia.id,
   );
 
   const context: ShamanContext = {
-    ...shaman.shamanMetadata,
+    shamanCreator: shaman.shamanCreator,
     fetch,
     publicClient,
     encodeFunctionData,
@@ -115,10 +115,21 @@ export const executeShaman = async (shamanId: Hex) => {
     walletClient: serverClient,
   };
 
-  const result = await executeCode(shaman.shamanMetadata.code, context);
+  const codeResult = await executeCode(shaman.shamanMetadata.code, context);
+
+  const result = {
+    ...codeResult,
+    shamanMetadata: {
+      shamanId,
+      prompt: shaman.shamanMetadata.prompt,
+      decodedCode: codeResult.decodedCode,
+      shamanCreator: shaman.shamanCreator,
+      shamanCreatedAt: shaman.shamanMetadata.createdAt,
+    },
+  };
 
   logger.info(`Uploading operation log to IPFS: ${JSON.stringify(result)}`);
-  const { cid: logMetadataHash } = await uploadOperationLog(result);
+  const { cid: logMetadataHash } = await upload(result);
   logger.info(`Operation log uploaded to IPFS: ${logMetadataHash}`);
 
   // Log result to database

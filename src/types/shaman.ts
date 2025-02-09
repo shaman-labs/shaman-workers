@@ -9,11 +9,9 @@ import {
 import { createServerClient } from "../services/privy.ts";
 
 export interface ShamanMetadata {
-  shamanId: Hex;
   prompt: string;
   code: string;
   createdAt: string;
-  chainId: number;
 }
 
 export interface ShamanEntity {
