@@ -15,7 +15,7 @@ import {
 } from "../types/shaman.ts";
 import { IPFS_GATEWAY } from "../config/env.ts";
 import { operatorAccount, publicClient } from "./evm.ts";
-import { createServerClient } from "./privy.ts";
+import { ServerWalletClient } from "./privy.ts";
 import { executeCode } from "./codeExecutor.ts";
 import { upload } from "./filebase.ts";
 
@@ -39,14 +39,26 @@ export const getShaman = async (shamanId: Hex) => {
     ]);
 
   const shamanMetadata = await getShamanMetadata(shamanMetadataHash);
-  logger.info(`Shaman metadata: ${JSON.stringify(shamanMetadata)}`);
-  return {
+
+  const shaman = {
     shamanId,
     shamanActive,
     shamanBalance,
     shamanMetadata,
     shamanCreator,
   } as ShamanEntity;
+
+  logger.info(`Fetched Shaman: ${
+    JSON.stringify({
+      shamanId,
+      shamanActive,
+      shamanBalance: shamanBalance.toString(),
+      shamanMetadata,
+      shamanCreator,
+    })
+  }`);
+
+  return shaman;
 };
 
 export const getShamanMetadata = async (cid: string) => {
@@ -99,7 +111,7 @@ export const executeShaman = async (shamanId: Hex) => {
     throw new Error(`Shaman has no balance: ${shamanId}`);
   }
 
-  const serverClient = createServerClient(
+  const walletClient = new ServerWalletClient(
     shaman.shamanCreator,
     arbitrumSepolia.id,
   );
@@ -108,11 +120,11 @@ export const executeShaman = async (shamanId: Hex) => {
     shamanCreator: shaman.shamanCreator,
     fetch,
     publicClient,
+    walletClient,
     encodeFunctionData,
     parseEther,
     parseUnits,
     formatEther,
-    walletClient: serverClient,
   };
 
   const codeResult = await executeCode(shaman.shamanMetadata.code, context);
