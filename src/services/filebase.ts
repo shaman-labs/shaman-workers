@@ -2,7 +2,6 @@ import { ObjectManager } from "@filebase/sdk";
 import { Buffer } from "node:buffer";
 import { v4 as uuidv4 } from "uuid";
 import { S3_BUCKET, S3_KEY, S3_SECRET } from "../config/env.ts";
-import { ExecutionResult } from "../types/shaman.ts";
 
 export const objectManager = new ObjectManager(
   S3_KEY,
@@ -12,10 +11,10 @@ export const objectManager = new ObjectManager(
   },
 );
 
-export const uploadOperationLog = (result: ExecutionResult) =>
+export const upload = (obj: unknown) =>
   objectManager.upload(
     uuidv4(),
-    Buffer.from(JSON.stringify(result)),
+    Buffer.from(JSON.stringify(obj)),
     null,
     null,
   );

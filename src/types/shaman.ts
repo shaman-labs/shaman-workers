@@ -6,14 +6,12 @@ import {
   parseUnits,
   PublicClient,
 } from "viem";
-import { createServerClient } from "../services/privy.ts";
+import { ServerWalletClient } from "../services/privy.ts";
 
 export interface ShamanMetadata {
-  shamanId: Hex;
   prompt: string;
   code: string;
   createdAt: string;
-  chainId: number;
 }
 
 export interface ShamanEntity {
@@ -27,7 +25,7 @@ export interface ShamanEntity {
 export interface ShamanContext {
   fetch: typeof fetch;
   publicClient: PublicClient;
-  walletClient: typeof createServerClient;
+  walletClient: ServerWalletClient;
   encodeFunctionData: typeof encodeFunctionData;
   parseEther: typeof parseEther;
   parseUnits: typeof parseUnits;
@@ -48,6 +46,6 @@ export interface ExecutionResult {
 
 export interface Transaction {
   to: Hex;
-  value: bigint;
+  value: number | bigint | string;
   data: Hex;
 }

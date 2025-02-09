@@ -15,9 +15,9 @@ import {
 } from "../types/shaman.ts";
 import { IPFS_GATEWAY } from "../config/env.ts";
 import { operatorAccount, publicClient } from "./evm.ts";
-import { createServerClient } from "./privy.ts";
+import { ServerWalletClient } from "./privy.ts";
 import { executeCode } from "./codeExecutor.ts";
-import { uploadOperationLog } from "./filebase.ts";
+import { upload } from "./filebase.ts";
 
 export const getShamanActive = (shamanId: Hex) =>
   worldContract.read.getShamanActive([shamanId]);
@@ -39,14 +39,26 @@ export const getShaman = async (shamanId: Hex) => {
     ]);
 
   const shamanMetadata = await getShamanMetadata(shamanMetadataHash);
-  logger.info(`Shaman metadata: ${JSON.stringify(shamanMetadata)}`);
-  return {
+
+  const shaman = {
     shamanId,
     shamanActive,
     shamanBalance,
     shamanMetadata,
     shamanCreator,
   } as ShamanEntity;
+
+  logger.info(`Fetched Shaman: ${
+    JSON.stringify({
+      shamanId,
+      shamanActive,
+      shamanBalance: shamanBalance.toString(),
+      shamanMetadata,
+      shamanCreator,
+    })
+  }`);
+
+  return shaman;
 };
 
 export const getShamanMetadata = async (cid: string) => {
@@ -99,26 +111,37 @@ export const executeShaman = async (shamanId: Hex) => {
     throw new Error(`Shaman has no balance: ${shamanId}`);
   }
 
-  const serverClient = createServerClient(
+  const walletClient = new ServerWalletClient(
     shaman.shamanCreator,
-    shaman.shamanMetadata.chainId,
+    arbitrumSepolia.id,
   );
 
   const context: ShamanContext = {
-    ...shaman.shamanMetadata,
+    shamanCreator: shaman.shamanCreator,
     fetch,
     publicClient,
+    walletClient,
     encodeFunctionData,
     parseEther,
     parseUnits,
     formatEther,
-    walletClient: serverClient,
   };
 
-  const result = await executeCode(shaman.shamanMetadata.code, context);
+  const codeResult = await executeCode(shaman.shamanMetadata.code, context);
+
+  const result = {
+    ...codeResult,
+    shamanMetadata: {
+      shamanId,
+      prompt: shaman.shamanMetadata.prompt,
+      decodedCode: codeResult.decodedCode,
+      shamanCreator: shaman.shamanCreator,
+      shamanCreatedAt: shaman.shamanMetadata.createdAt,
+    },
+  };
 
   logger.info(`Uploading operation log to IPFS: ${JSON.stringify(result)}`);
-  const { cid: logMetadataHash } = await uploadOperationLog(result);
+  const { cid: logMetadataHash } = await upload(result);
   logger.info(`Operation log uploaded to IPFS: ${logMetadataHash}`);
 
   // Log result to database
