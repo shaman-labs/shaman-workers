@@ -1,5 +1,5 @@
 import { PrivyClient } from "@privy-io/server-auth";
-import { Hex } from "viem";
+import { Hex, toHex } from "viem";
 import {
   PRIVY_APP_ID,
   PRIVY_APP_SECRET,
@@ -24,7 +24,7 @@ export const createServerClient = (address: Hex, chainId: number) => {
         caip2: `eip155:${chainId}`,
         transaction: {
           to: tx.to,
-          value: tx.value,
+          value: toHex(tx.value?.toString() ?? "0x0"),
           data: tx.data,
           chainId,
         },
