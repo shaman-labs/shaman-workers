@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "dev": "deno run --watch src/main.ts"
+    "dev": "deno run --allow-net --allow-import --allow-read --allow-env --allow-sys --allow-ffi --watch src/main.ts"
   },
   "imports": {
     "@filebase/sdk": "npm:@filebase/sdk@^1.0.6",
