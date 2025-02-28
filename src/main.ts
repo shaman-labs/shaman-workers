@@ -3,99 +3,78 @@ import { PORT } from "./config/env.ts";
 import { ShamanRequest } from "./types/shaman.ts";
 import { executeShaman } from "./services/shamans.ts";
 import { isHex } from "viem";
+import { Hono } from "@hono/hono";
+import { cors } from "@hono/hono/cors";
 
 // Initialize logger
 initializeLogger();
 
-// Define CORS headers
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
+// Create Hono app
+const app = new Hono();
 
-async function handleRequest(request: Request): Promise<Response> {
+// Apply CORS middleware
+app.use(
+  "*",
+  cors({
+    origin: "*",
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+// Define routes
+app.post("/", async (c) => {
   try {
-    // Handle preflight requests (OPTIONS)
-    if (request.method === "OPTIONS") {
-      return new Response(null, { headers: new Headers(corsHeaders) });
-    }
-
-    // Only accept POST requests
-    if (request.method !== "POST") {
-      logger.warn(`Invalid method: ${request.method}`);
-      return new Response("Method not allowed. Please use POST.", {
-        status: 405,
-        headers: new Headers(corsHeaders),
-      });
-    }
-
     // Request checks
     let body: ShamanRequest;
     try {
-      body = await request.json();
+      body = await c.req.json();
     } catch (e) {
       logger.error("Failed to parse request body");
       logger.error(e);
-      return new Response("Invalid JSON body", {
-        status: 400,
-        headers: new Headers(corsHeaders),
-      });
+      return c.json({ error: "Invalid JSON body" }, 400);
     }
 
     if (!body.shamanId) {
       logger.warn("Missing shamanId in request");
-      return new Response("Missing shamanId in request body", {
-        status: 400,
-        headers: new Headers(corsHeaders),
-      });
+      return c.json({ error: "Missing shamanId in request body" }, 400);
     }
 
     if (!isHex(body.shamanId)) {
       logger.warn(
-        `Invalid shamanId in request: ${body.shamanId}, expected a hex string`,
+        `Invalid shamanId in request: ${body.shamanId}, expected a hex string`
       );
-      return new Response(
-        `Invalid shamanId in request: ${body.shamanId}, expected a hex string`,
+      return c.json(
         {
-          status: 400,
-          headers: new Headers(corsHeaders),
+          error: `Invalid shamanId in request: ${body.shamanId}, expected a hex string`,
         },
+        400
       );
     }
 
     // Execute the shaman
     const executionResult = await executeShaman(body.shamanId);
 
-    // Return successful response with CORS headers
-    return new Response(JSON.stringify(executionResult), {
-      headers: new Headers({
-        ...corsHeaders,
-        "content-type": "application/json",
-      }),
-    });
+    // Return successful response
+    return c.json(executionResult);
   } catch (error: unknown) {
     logger.error(
       `Error processing request: ${
         error instanceof Error ? error.message : "Unknown error"
-      }`,
+      }`
     );
-    return new Response(
-      JSON.stringify({
-        error: error instanceof Error
-          ? error.message
-          : "Unknown error occurred",
-      }),
+    return c.json(
       {
-        status: 500,
-        headers: new Headers({
-          ...corsHeaders,
-          "content-type": "application/json",
-        }),
+        error:
+          error instanceof Error ? error.message : "Unknown error occurred",
       },
+      500
     );
   }
-}
+});
+
+// Health check endpoint
+app.get("/health", (c) => c.json({ status: "ok" }));
 
 // Start the server
-Deno.serve({ port: PORT }, handleRequest);
+Deno.serve({ port: PORT }, app.fetch);

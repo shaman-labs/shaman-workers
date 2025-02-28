@@ -3,6 +3,7 @@
   "specifiers": {
     "jsr:@deno/cache-dir@0.8": "0.8.0",
     "jsr:@deno/graph@~0.69.7": "0.69.10",
+    "jsr:@hono/hono@^4.7.2": "4.7.2",
     "jsr:@std/assert@1": "1.0.11",
     "jsr:@std/assert@~0.218.2": "0.218.2",
     "jsr:@std/bytes@~0.218.2": "0.218.2",
@@ -44,6 +45,9 @@
     },
     "@deno/graph@0.69.10": {
       "integrity": "38fe22ac5686f6ece5daeec5a4df65c6314d7d32adcc33f77917a13cfaffa26f"
+    },
+    "@hono/hono@4.7.2": {
+      "integrity": "73466a24bd6eb3b527cde18e59ca5543890ddacb4312fc0bc7504d28a7e57a38"
     },
     "@std/assert@0.218.2": {
       "integrity": "7f0a5a1a8cf86607cd6c2c030584096e1ffad27fc9271429a8cb48cfbdee5eaf"
@@ -2626,6 +2630,7 @@
   },
   "workspace": {
     "dependencies": [
+      "jsr:@hono/hono@^4.7.2",
       "jsr:@std/assert@1",
       "jsr:@std/http@1",
       "npm:@filebase/sdk@^1.0.6",
