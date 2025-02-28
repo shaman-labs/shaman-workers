@@ -33,10 +33,6 @@ export interface ShamanContext {
   shamanCreator: Hex;
 }
 
-export interface ShamanRequest {
-  shamanId: Hex;
-}
-
 export interface ExecutionResult {
   success: boolean;
   decodedCode?: string;
