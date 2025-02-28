@@ -38,19 +38,24 @@ jobs:
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
+      - name: Update app.yaml with environment variables
+        run: |
+          export TAG=${{ env.TAG }}
+          export IPFS_GATEWAY=${{ secrets.IPFS_GATEWAY }}
+          export ARB_SEPOLIA_RPC_URL=${{ secrets.ARB_SEPOLIA_RPC_URL }}
+          export PRIVY_APP_ID=${{ secrets.PRIVY_APP_ID }}
+          export PRIVY_APP_SECRET=${{ secrets.PRIVY_APP_SECRET }}
+          export PRIVY_AUTH_PRIVATE_KEY=${{ secrets.PRIVY_AUTH_PRIVATE_KEY }}
+          export OPERATOR_PRIVATE_KEY=${{ secrets.OPERATOR_PRIVATE_KEY }}
+          export WORLD_ADDRESS=${{ secrets.WORLD_ADDRESS }}
+          export S3_KEY=${{ secrets.S3_KEY }}
+          export S3_SECRET=${{ secrets.S3_SECRET }}
+          export S3_BUCKET=${{ secrets.S3_BUCKET }}
+          envsubst < .do/app.yaml > .do/app.yaml.tmp
+          mv .do/app.yaml.tmp .do/app.yaml
+          cat .do/app.yaml
+
       - name: Deploy the app
         uses: digitalocean/app_action/deploy@v2
-        env:
-          SAMPLE_DIGEST: ${{ steps.push.outputs.digest }}
-          IPFS_GATEWAY: ${{ secrets.IPFS_GATEWAY }}
-          ARB_SEPOLIA_RPC_URL: ${{ secrets.ARB_SEPOLIA_RPC_URL }}
-          PRIVY_APP_ID: ${{ secrets.PRIVY_APP_ID }}
-          PRIVY_APP_SECRET: ${{ secrets.PRIVY_APP_SECRET }}
-          PRIVY_AUTH_PRIVATE_KEY: ${{ secrets.PRIVY_AUTH_PRIVATE_KEY }}
-          OPERATOR_PRIVATE_KEY: ${{ secrets.OPERATOR_PRIVATE_KEY }}
-          WORLD_ADDRESS: ${{ secrets.WORLD_ADDRESS }}
-          S3_KEY: ${{ secrets.S3_KEY }}
-          S3_SECRET: ${{ secrets.S3_SECRET }}
-          S3_BUCKET: ${{ secrets.S3_BUCKET }}
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
