@@ -23,6 +23,20 @@ jobs:
       - name: Set $TAG from shortened sha
         run: echo "TAG=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
 
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Verify registry exists
+        run: |
+          echo "Checking registry status..."
+          doctl registry get || (echo "Creating registry 'shaman'..." && doctl registry create shaman)
+          echo "Listing registries:"
+          doctl registry get
+          echo "Listing repositories in registry:"
+          doctl registry repository list
+
       - name: Log in to Digital Ocean Container Registry
         uses: docker/login-action@v3.3.0
         with:
@@ -37,6 +51,15 @@ jobs:
           context: .
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+      - name: Verify image was pushed
+        run: |
+          echo "Waiting for image to be available..."
+          sleep 10
+          echo "Listing repositories in registry:"
+          doctl registry repository list
+          echo "Listing tags for repository:"
+          doctl registry repository list-tags ${{ env.IMAGE_NAME }} || echo "Repository not found yet, this is expected for first push"
 
       - name: Update app.yaml with environment variables
         run: |
@@ -59,3 +82,4 @@ jobs:
         uses: digitalocean/app_action/deploy@v2
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          app_name: shaman-app
