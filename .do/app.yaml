@@ -10,6 +10,7 @@ services:
       registry: registry.digitalocean.com/shaman
       repository: shaman-image
       tag: ${TAG}
+      registry_type: DOCR
     instance_count: 1
     instance_size_slug: basic-xxs
     envs:
