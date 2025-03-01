@@ -5,8 +5,8 @@ import {
   PRIVY_APP_SECRET,
   PRIVY_AUTH_PRIVATE_KEY,
 } from "../config/env.ts";
-import { Transaction } from "../types/shaman.ts";
 import { logger } from "../config/logger.ts";
+import { Transaction } from "../types/common.ts";
 
 export class ServerWalletClient {
   constructor(public address: Hex, public chainId: number) {

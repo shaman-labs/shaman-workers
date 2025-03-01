@@ -32,7 +32,6 @@ export const getShaman = async (shamanId: Hex) => {
     JSON.stringify({
       shamanId,
       shamanName,
-      shamanMetadata,
       shamanCreator,
     })
   }`);

@@ -67,7 +67,10 @@ export const getWorkflow = async (workflowId: Hex) => {
   logger.info(`Fetched Workflow: ${
     JSON.stringify({
       workflowId,
-      workflowBalance: formatEther(workflowBalance),
+      workflowBalance: workflowBalance.toString(),
+      workflowState: workflowState,
+      workflowActive: workflowActive,
+      workflowCreator: workflowCreator,
     })
   }`);
 
@@ -78,9 +81,7 @@ export const enqueueWorkflowJob = async (workflowId: Hex, cost: bigint) => {
   const workflow = await getWorkflow(workflowId);
   if (workflow.workflowBalance < cost) {
     throw new Error(
-      `Workflow has insufficient balance: ${workflowId}, Balance: ${
-        formatEther(workflow.workflowBalance)
-      }, Cost: ${formatEther(cost)}`,
+      `Workflow has insufficient balance: ${workflowId}, Balance: ${workflow.workflowBalance.toString()}, Cost: ${cost.toString()}`,
     );
   }
 
@@ -106,6 +107,8 @@ export const enqueueWorkflowJob = async (workflowId: Hex, cost: bigint) => {
       account: operatorAccount,
     },
   );
+
+  await publicClient.waitForTransactionReceipt({ hash });
 
   return hash;
 };
@@ -136,6 +139,8 @@ export const startWorkflowJob = async (workflowId: Hex) => {
     },
   );
 
+  await publicClient.waitForTransactionReceipt({ hash });
+
   return hash;
 };
 
@@ -148,9 +153,7 @@ export const completeWorkflowJob = async (
   const workflow = await getWorkflow(workflowId);
   if (workflow.workflowBalance < cost) {
     throw new Error(
-      `Workflow has insufficient balance: ${workflowId}, Balance: ${
-        formatEther(workflow.workflowBalance)
-      }, Cost: ${formatEther(cost)}`,
+      `Workflow has insufficient balance: ${workflowId}, Balance: ${workflow.workflowBalance.toString()}, Cost: ${cost.toString()}`,
     );
   }
 
@@ -176,6 +179,8 @@ export const completeWorkflowJob = async (
       account: operatorAccount,
     },
   );
+
+  await publicClient.waitForTransactionReceipt({ hash });
 
   return hash;
 };
