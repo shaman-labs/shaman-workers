@@ -1,24 +1,31 @@
-import { Hex, isHex } from "viem";
 import { Hono } from "@hono/hono";
+import { isHex } from "viem";
 import { logger } from "../config/logger.ts";
-import { executeShaman } from "../services/shamans.ts";
-
-export interface ShamanRequest {
-  shamanId: Hex;
-}
+import {
+  enqueueWorkflowJob,
+  executeWorkflow,
+  startWorkflowJob,
+} from "../services/workflows.ts";
+import { WorkflowRequest } from "../types/common.ts";
 
 const app = new Hono();
 
 app.post("/", async (c) => {
   try {
-    const body: ShamanRequest = await c.req.json();
+    const body: WorkflowRequest = await c.req.json();
 
-    if (!body.shamanId || !isHex(body.shamanId)) {
-      logger.warn("Missing shamanId in request");
-      return c.json({ error: "Missing shamanId in request body" }, 400);
+    if (!body.workflowId || !isHex(body.workflowId)) {
+      logger.warn("Missing workflowId in request");
+      return c.json({ error: "Missing workflowId in request body" }, 400);
     }
 
-    const executionResult = await executeShaman(body.shamanId);
+    // enqueue workflow job
+    await enqueueWorkflowJob(body.workflowId, 1n);
+    // start workflow job
+    await startWorkflowJob(body.workflowId);
+
+    // execute workflow
+    const executionResult = await executeWorkflow(body.workflowId);
 
     return c.json(executionResult);
   } catch (error) {

@@ -7,17 +7,16 @@ import {
   zeroAddress,
 } from "viem";
 import { arbitrumSepolia } from "viem/chains";
-import { worldContract } from "../mud/contract.ts";
 import { logger } from "../config/logger.ts";
-import { ShamanContext, ShamanEntity } from "../types/shaman.ts";
-import { IPFS_GATEWAY } from "../config/env.ts";
-import { operatorAccount, publicClient, walletClient } from "./evm.ts";
-import { ServerWalletClient } from "./privy.ts";
-import { executeCode } from "./codeExecutor.ts";
-import { upload } from "./filebase.ts";
-import { WorkflowEntity, WorkflowState } from "../types/workflow.ts";
-import { getShaman } from "./shamans.ts";
+import { worldContract } from "../mud/contract.ts";
 import { WorkflowExecutionResult } from "../types/common.ts";
+import { ShamanContext, ShamanEntity } from "../types/shaman.ts";
+import { WorkflowEntity, WorkflowState } from "../types/workflow.ts";
+import { executeCode } from "./codeExecutor.ts";
+import { operatorAccount, publicClient } from "./evm.ts";
+import { upload } from "./filebase.ts";
+import { ServerWalletClient } from "./privy.ts";
+import { getShaman } from "./shamans.ts";
 
 export const getWorkflowCreator = (workflowId: Hex) =>
   worldContract.read.getWorkflowCreator([workflowId]);

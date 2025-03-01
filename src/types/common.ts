@@ -12,6 +12,10 @@ export interface WorkflowExecutionResult {
   results: CodeExecutionResult[];
 }
 
+export interface WorkflowRequest {
+  workflowId: Hex;
+}
+
 export interface Transaction {
   to: Hex;
   value: number | bigint | string;

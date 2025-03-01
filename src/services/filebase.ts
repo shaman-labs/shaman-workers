@@ -11,5 +11,5 @@ export const upload = (obj: unknown) =>
     uuidv4(),
     new TextEncoder().encode(JSON.stringify(obj)),
     null,
-    null
+    null,
   );
