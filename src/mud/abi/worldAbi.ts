@@ -6,26 +6,26 @@ export const worldAbi = [
       {
         name: "workflowId",
         type: "bytes32",
-        internalType: "bytes32"
+        internalType: "bytes32",
       },
       {
         name: "cost",
         type: "uint256",
-        internalType: "uint256"
+        internalType: "uint256",
       },
       {
         name: "success",
         type: "bool",
-        internalType: "bool"
+        internalType: "bool",
       },
       {
         name: "metadata",
         type: "string",
-        internalType: "string"
-      }
+        internalType: "string",
+      },
     ],
     outputs: [],
-    stateMutability: "nonpayable"
+    stateMutability: "nonpayable",
   },
   {
     type: "function",
@@ -34,16 +34,16 @@ export const worldAbi = [
       {
         name: "workflowId",
         type: "bytes32",
-        internalType: "bytes32"
+        internalType: "bytes32",
       },
       {
         name: "cost",
         type: "uint256",
-        internalType: "uint256"
-      }
+        internalType: "uint256",
+      },
     ],
     outputs: [],
-    stateMutability: "nonpayable"
+    stateMutability: "nonpayable",
   },
   {
     type: "function",
@@ -52,11 +52,11 @@ export const worldAbi = [
       {
         name: "workflowId",
         type: "bytes32",
-        internalType: "bytes32"
-      }
+        internalType: "bytes32",
+      },
     ],
     outputs: [],
-    stateMutability: "nonpayable"
+    stateMutability: "nonpayable",
   },
   {
     type: "function",
@@ -65,17 +65,17 @@ export const worldAbi = [
       {
         name: "shamanId",
         type: "bytes32",
-        internalType: "bytes32"
-      }
+        internalType: "bytes32",
+      },
     ],
     outputs: [
       {
         name: "",
         type: "address",
-        internalType: "address"
-      }
+        internalType: "address",
+      },
     ],
-    stateMutability: "view"
+    stateMutability: "view",
   },
   {
     type: "function",
@@ -84,17 +84,17 @@ export const worldAbi = [
       {
         name: "name",
         type: "string",
-        internalType: "string"
-      }
+        internalType: "string",
+      },
     ],
     outputs: [
       {
         name: "",
         type: "bytes32",
-        internalType: "bytes32"
-      }
+        internalType: "bytes32",
+      },
     ],
-    stateMutability: "view"
+    stateMutability: "view",
   },
   {
     type: "function",
@@ -103,17 +103,17 @@ export const worldAbi = [
       {
         name: "shamanId",
         type: "bytes32",
-        internalType: "bytes32"
-      }
+        internalType: "bytes32",
+      },
     ],
     outputs: [
       {
         name: "",
         type: "string",
-        internalType: "string"
-      }
+        internalType: "string",
+      },
     ],
-    stateMutability: "view"
+    stateMutability: "view",
   },
   {
     type: "function",
@@ -122,17 +122,17 @@ export const worldAbi = [
       {
         name: "shamanId",
         type: "bytes32",
-        internalType: "bytes32"
-      }
+        internalType: "bytes32",
+      },
     ],
     outputs: [
       {
         name: "",
         type: "string",
-        internalType: "string"
-      }
+        internalType: "string",
+      },
     ],
-    stateMutability: "view"
+    stateMutability: "view",
   },
   {
     type: "function",
@@ -142,10 +142,10 @@ export const worldAbi = [
       {
         name: "",
         type: "address",
-        internalType: "address"
-      }
+        internalType: "address",
+      },
     ],
-    stateMutability: "view"
+    stateMutability: "view",
   },
   {
     type: "function",
@@ -154,17 +154,17 @@ export const worldAbi = [
       {
         name: "workflowId",
         type: "bytes32",
-        internalType: "bytes32"
-      }
+        internalType: "bytes32",
+      },
     ],
     outputs: [
       {
         name: "",
         type: "bool",
-        internalType: "bool"
-      }
+        internalType: "bool",
+      },
     ],
-    stateMutability: "view"
+    stateMutability: "view",
   },
   {
     type: "function",
@@ -173,17 +173,17 @@ export const worldAbi = [
       {
         name: "workflowId",
         type: "bytes32",
-        internalType: "bytes32"
-      }
+        internalType: "bytes32",
+      },
     ],
     outputs: [
       {
         name: "",
         type: "uint256",
-        internalType: "uint256"
-      }
+        internalType: "uint256",
+      },
     ],
-    stateMutability: "view"
+    stateMutability: "view",
   },
   {
     type: "function",
@@ -192,17 +192,17 @@ export const worldAbi = [
       {
         name: "workflowId",
         type: "bytes32",
-        internalType: "bytes32"
-      }
+        internalType: "bytes32",
+      },
     ],
     outputs: [
       {
         name: "",
         type: "address",
-        internalType: "address"
-      }
+        internalType: "address",
+      },
     ],
-    stateMutability: "view"
+    stateMutability: "view",
   },
   {
     type: "function",
@@ -211,17 +211,17 @@ export const worldAbi = [
       {
         name: "shamanId",
         type: "bytes32",
-        internalType: "bytes32"
-      }
+        internalType: "bytes32",
+      },
     ],
     outputs: [
       {
         name: "",
         type: "bytes32[]",
-        internalType: "bytes32[]"
-      }
+        internalType: "bytes32[]",
+      },
     ],
-    stateMutability: "view"
+    stateMutability: "view",
   },
   {
     type: "function",
@@ -230,17 +230,17 @@ export const worldAbi = [
       {
         name: "sourceId",
         type: "bytes32",
-        internalType: "bytes32"
-      }
+        internalType: "bytes32",
+      },
     ],
     outputs: [
       {
         name: "",
         type: "bytes32[]",
-        internalType: "bytes32[]"
-      }
+        internalType: "bytes32[]",
+      },
     ],
-    stateMutability: "view"
+    stateMutability: "view",
   },
   {
     type: "function",
@@ -249,17 +249,17 @@ export const worldAbi = [
       {
         name: "workflowId",
         type: "bytes32",
-        internalType: "bytes32"
-      }
+        internalType: "bytes32",
+      },
     ],
     outputs: [
       {
         name: "",
         type: "string",
-        internalType: "string"
-      }
+        internalType: "string",
+      },
     ],
-    stateMutability: "view"
+    stateMutability: "view",
   },
   {
     type: "function",
@@ -268,17 +268,17 @@ export const worldAbi = [
       {
         name: "workflowId",
         type: "bytes32",
-        internalType: "bytes32"
-      }
+        internalType: "bytes32",
+      },
     ],
     outputs: [
       {
         name: "",
         type: "bytes32[]",
-        internalType: "bytes32[]"
-      }
+        internalType: "bytes32[]",
+      },
     ],
-    stateMutability: "view"
+    stateMutability: "view",
   },
   {
     type: "function",
@@ -287,17 +287,17 @@ export const worldAbi = [
       {
         name: "workflowId",
         type: "bytes32",
-        internalType: "bytes32"
-      }
+        internalType: "bytes32",
+      },
     ],
     outputs: [
       {
         name: "",
         type: "bytes32[]",
-        internalType: "bytes32[]"
-      }
+        internalType: "bytes32[]",
+      },
     ],
-    stateMutability: "view"
+    stateMutability: "view",
   },
   {
     type: "function",
@@ -306,16 +306,16 @@ export const worldAbi = [
       {
         name: "workflowId",
         type: "bytes32",
-        internalType: "bytes32"
-      }
+        internalType: "bytes32",
+      },
     ],
     outputs: [
       {
         name: "",
         type: "uint8",
-        internalType: "enum WorkflowState"
-      }
+        internalType: "enum WorkflowState",
+      },
     ],
-    stateMutability: "view"
+    stateMutability: "view",
   },
 ] as const;

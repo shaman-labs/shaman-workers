@@ -1,6 +1,7 @@
 import { decodeBase64 } from "jsr:@std/encoding/base64";
 import { logger } from "../config/logger.ts";
-import { ExecutionResult, ShamanContext } from "../types/shaman.ts";
+import { ShamanContext } from "../types/shaman.ts";
+import { CodeExecutionResult } from "../types/common.ts";
 
 const SEPARATOR = "=".repeat(80);
 
@@ -12,7 +13,7 @@ function decodeCode(str: string): string {
 export async function executeCode(
   code: string,
   context: ShamanContext,
-): Promise<ExecutionResult> {
+): Promise<CodeExecutionResult> {
   try {
     logger.debug("Preparing to execute code");
 

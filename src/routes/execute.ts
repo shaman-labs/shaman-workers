@@ -1,4 +1,4 @@
-import { isHex, Hex } from "viem";
+import { Hex, isHex } from "viem";
 import { Hono } from "@hono/hono";
 import { logger } from "../config/logger.ts";
 import { executeShaman } from "../services/shamans.ts";

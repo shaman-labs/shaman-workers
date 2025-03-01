@@ -1,4 +1,5 @@
 import {
+  Address,
   encodeFunctionData,
   formatEther,
   Hex,
@@ -16,9 +17,8 @@ export interface ShamanMetadata {
 
 export interface ShamanEntity {
   shamanId: Hex;
-  shamanCreator: Hex;
-  shamanActive: boolean;
-  shamanBalance: bigint;
+  shamanName: string;
+  shamanCreator: Address;
   shamanMetadata: ShamanMetadata;
 }
 
@@ -30,18 +30,8 @@ export interface ShamanContext {
   parseEther: typeof parseEther;
   parseUnits: typeof parseUnits;
   formatEther: typeof formatEther;
-  shamanCreator: Hex;
-}
-
-export interface ExecutionResult {
-  success: boolean;
-  decodedCode?: string;
-  result: unknown;
-  timestamp: number;
-}
-
-export interface Transaction {
-  to: Hex;
-  value: number | bigint | string;
-  data: Hex;
+  shamanCreator: Address;
+  workflowCreator: Address;
+  previousResults?: unknown;
+  extraArgs?: unknown;
 }

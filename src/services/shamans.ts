@@ -1,28 +1,11 @@
-import {
-  encodeFunctionData,
-  formatEther,
-  Hex,
-  parseEther,
-  parseUnits,
-} from "viem";
-import { arbitrumSepolia } from "viem/chains";
+import { Hex } from "viem";
 import { worldContract } from "../mud/contract.ts";
 import { logger } from "../config/logger.ts";
-import {
-  ShamanContext,
-  ShamanEntity,
-  ShamanMetadata,
-} from "../types/shaman.ts";
+import { ShamanEntity, ShamanMetadata } from "../types/shaman.ts";
 import { IPFS_GATEWAY } from "../config/env.ts";
-import { operatorAccount, publicClient } from "./evm.ts";
-import { ServerWalletClient } from "./privy.ts";
-import { executeCode } from "./codeExecutor.ts";
-import { upload } from "./filebase.ts";
 
-export const getShamanActive = (shamanId: Hex) =>
-  worldContract.read.getShamanActive([shamanId]);
-export const getShamanBalance = (shamanId: Hex) =>
-  worldContract.read.getShamanBalance([shamanId]);
+export const getShamanName = (shamanId: Hex) =>
+  worldContract.read.getShamanName([shamanId]);
 export const getShamanMetadataHash = (shamanId: Hex) =>
   worldContract.read.getShamanMetadata([shamanId]);
 export const getShamanCreator = (shamanId: Hex) =>
@@ -30,29 +13,25 @@ export const getShamanCreator = (shamanId: Hex) =>
 
 export const getShaman = async (shamanId: Hex) => {
   logger.info(`Getting shaman: ${shamanId}`);
-  const [shamanActive, shamanBalance, shamanMetadataHash, shamanCreator] =
-    await Promise.all([
-      getShamanActive(shamanId),
-      getShamanBalance(shamanId),
-      getShamanMetadataHash(shamanId),
-      getShamanCreator(shamanId),
-    ]);
+  const [shamanName, shamanMetadataHash, shamanCreator] = await Promise.all([
+    getShamanName(shamanId),
+    getShamanMetadataHash(shamanId),
+    getShamanCreator(shamanId),
+  ]);
 
   const shamanMetadata = await getShamanMetadata(shamanMetadataHash);
 
   const shaman = {
     shamanId,
-    shamanActive,
-    shamanBalance,
-    shamanMetadata,
+    shamanName,
     shamanCreator,
+    shamanMetadata,
   } as ShamanEntity;
 
   logger.info(`Fetched Shaman: ${
     JSON.stringify({
       shamanId,
-      shamanActive,
-      shamanBalance: shamanBalance.toString(),
+      shamanName,
       shamanMetadata,
       shamanCreator,
     })
@@ -75,88 +54,4 @@ export const getShamanMetadata = async (cid: string) => {
 
   const metadata: ShamanMetadata = await response.json();
   return metadata;
-};
-
-export const logShamanOperation = async (
-  shamanId: Hex,
-  cost: bigint,
-  logMetadataHash: string,
-  success: boolean,
-) => {
-  await worldContract.simulate.logShamanOperation(
-    [shamanId, cost, logMetadataHash, success],
-    {
-      account: operatorAccount.address,
-    },
-  );
-
-  const hash = await worldContract.write.logShamanOperation(
-    [shamanId, cost, logMetadataHash, success],
-    {
-      chain: arbitrumSepolia,
-      account: operatorAccount,
-    },
-  );
-
-  // TODO: use waitForTransactionReceipt
-  return hash;
-};
-
-export const executeShaman = async (shamanId: Hex) => {
-  const shaman = await getShaman(shamanId);
-  if (!shaman.shamanActive) {
-    throw new Error(`Shaman is not active: ${shamanId}`);
-  }
-  if (shaman.shamanBalance < 1n) {
-    throw new Error(`Shaman has no balance: ${shamanId}`);
-  }
-
-  const walletClient = new ServerWalletClient(
-    shaman.shamanCreator,
-    arbitrumSepolia.id,
-  );
-
-  const context: ShamanContext = {
-    shamanCreator: shaman.shamanCreator,
-    fetch,
-    publicClient,
-    walletClient,
-    encodeFunctionData,
-    parseEther,
-    parseUnits,
-    formatEther,
-  };
-
-  const codeResult = await executeCode(shaman.shamanMetadata.code, context);
-
-  const result = {
-    ...codeResult,
-    shamanMetadata: {
-      shamanId,
-      prompt: shaman.shamanMetadata.prompt,
-      decodedCode: codeResult.decodedCode,
-      shamanCreator: shaman.shamanCreator,
-      shamanCreatedAt: shaman.shamanMetadata.createdAt,
-    },
-  };
-
-  logger.info(`Uploading operation log to IPFS: ${JSON.stringify(result)}`);
-  const { cid: logMetadataHash } = await upload(result);
-  logger.info(`Operation log uploaded to IPFS: ${logMetadataHash}`);
-
-  // Log result to database
-  logger.info(`Logging operation to database: ${JSON.stringify(result)}`);
-  const logHash = await logShamanOperation(
-    shamanId,
-    1n,
-    logMetadataHash,
-    result.success,
-  );
-  logger.info(`Operation logged to database: ${logHash}`);
-
-  return {
-    ...result,
-    logMetadataHash,
-    logHash,
-  };
 };
