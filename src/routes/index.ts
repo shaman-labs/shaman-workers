@@ -15,7 +15,7 @@ export const initializeRoutes = () => {
       origin: "*",
       allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       allowHeaders: ["Content-Type", "Authorization"],
-    })
+    }),
   );
 
   app.route("/execute", executeRoute);

@@ -9,7 +9,7 @@ interface SourceMessage {
 
 export const enqueueFromSource = (
   source: string,
-  context: Record<string, unknown>
+  context: Record<string, unknown>,
 ) => {
   const message: SourceMessage = { source, context };
   logger.info(`Enqueuing source message: ${message}`);
