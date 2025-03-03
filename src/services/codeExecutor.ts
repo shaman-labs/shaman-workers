@@ -1,6 +1,6 @@
 import { decodeBase64 } from "jsr:@std/encoding/base64";
 import { logger } from "../config/logger.ts";
-import { ShamanContext } from "../types/shaman.ts";
+import { AbilityContext } from "../types/ability.ts";
 import { CodeExecutionResult } from "../types/common.ts";
 
 const SEPARATOR = "=".repeat(80);
@@ -12,7 +12,7 @@ function decodeCode(str: string): string {
 
 export async function executeCode(
   code: string,
-  context: ShamanContext,
+  context: AbilityContext,
 ): Promise<CodeExecutionResult> {
   try {
     logger.debug("Preparing to execute code");
@@ -27,9 +27,9 @@ export async function executeCode(
     }`;
     logger.debug(`Data URL:\n${SEPARATOR}\n${dataUrl}\n${SEPARATOR}`);
 
-    logger.debug("Importing and executing shaman code");
-    const { default: shamanFunction } = await import(dataUrl);
-    const result = await shamanFunction(context);
+    logger.debug("Importing and executing ability code");
+    const { default: abilityFunction } = await import(dataUrl);
+    const result = await abilityFunction(context);
     logger.debug("Code execution completed successfully");
     logger.debug(`Result: ${JSON.stringify(result)}`);
     return { success: true, decodedCode, result, timestamp: Date.now() };
