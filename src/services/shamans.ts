@@ -147,7 +147,7 @@ export const startShamanJob = async (shamanId: Hex) => {
 export const completeShamanJob = async (
   shamanId: Hex,
   cost: bigint,
-  logMetadataHash: string,
+  metadataHash: string,
   success: boolean,
 ) => {
   const shaman = await getShaman(shamanId);
@@ -166,14 +166,14 @@ export const completeShamanJob = async (
   }
 
   await worldContract.simulate.completeShamanJob(
-    [shamanId, cost, success, logMetadataHash],
+    [shamanId, cost, success, metadataHash],
     {
       account: operatorAccount.address,
     },
   );
 
   const hash = await worldContract.write.completeShamanJob(
-    [shamanId, cost, success, logMetadataHash],
+    [shamanId, cost, success, metadataHash],
     {
       chain: arbitrumSepolia,
       account: operatorAccount,
@@ -237,15 +237,15 @@ export const executeShaman = async (shamanId: Hex) => {
   }
 
   logger.info(`Uploading operation log to IPFS: ${JSON.stringify(result)}`);
-  const { cid: logMetadataHash } = await upload(result);
-  logger.info(`Operation log uploaded to IPFS: ${logMetadataHash}`);
+  const { cid: metadataHash } = await upload(result);
+  logger.info(`Operation log uploaded to IPFS: ${metadataHash}`);
 
   // Complete shaman
   logger.info(`Completing shaman: ${JSON.stringify(result)}`);
   const logHash = await completeShamanJob(
     shamanId,
     1n, // TODO: fetch cost from contract
-    logMetadataHash,
+    metadataHash,
     result.success,
   );
   logger.info(`Shaman completed: ${logHash}`);
