@@ -223,7 +223,11 @@ export const processShamanJob = async (
         return null;
     }
   } catch (error) {
-    logger.error(`Error processing shaman job ${shaman.shamanId}:`, error);
+    logger.error(
+      `Error processing shaman job ${shaman.shamanId}: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
     return null;
   }
 };

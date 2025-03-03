@@ -10,7 +10,7 @@ export const enqueueFromSource = (
   context: Record<string, unknown>,
 ) => {
   const message: SourceMessage = { sourceId, context };
-  logger.info(`Enqueuing source message: ${message}`);
+  logger.info(`Enqueuing source message with sourceId: ${message.sourceId}`);
 
   return kv.enqueue(message);
 };

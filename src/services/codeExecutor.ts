@@ -31,10 +31,18 @@ export async function executeCode(
     const { default: abilityFunction } = await import(dataUrl);
     const result = await abilityFunction(context);
     logger.debug("Code execution completed successfully");
-    logger.debug(`Result: ${JSON.stringify(result)}`);
+    logger.debug(
+      `Result: ${
+        typeof result === "object" ? JSON.stringify(result, null, 2) : result
+      }`,
+    );
     return { success: true, decodedCode, result, timestamp: Date.now() };
   } catch (error) {
-    logger.error("Error executing code:", error);
+    logger.error(
+      `Error executing code: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
     return { success: false, result: error, timestamp: Date.now() };
   }
 }

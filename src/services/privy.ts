@@ -13,7 +13,9 @@ export class ServerWalletClient {
   }
 
   async sendTransaction(tx: Transaction) {
-    logger.info(`Sending transaction: ${JSON.stringify(tx)}`);
+    logger.info(
+      `Sending transaction to: ${tx.to}, value: ${tx.value}, chainId: ${this.chainId}`,
+    );
     const { hash } = await privy.walletApi.ethereum.sendTransaction({
       address: this.address,
       chainType: "ethereum",
