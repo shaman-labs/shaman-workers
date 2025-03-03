@@ -285,12 +285,12 @@ export const executeShaman = async (shaman: ShamanEntity) => {
     };
   }
 
-  logger.info(`Uploading operation log to IPFS: ${JSON.stringify(result)}`);
+  logger.info("Uploading operation log to IPFS");
   const { cid: metadataHash } = await upload(result);
   logger.info(`Operation log uploaded to IPFS: ${metadataHash}`);
 
   // Complete shaman
-  logger.info(`Completing shaman: ${JSON.stringify(result)}`);
+  logger.info(`Completing shaman: ${shaman.shamanId}`);
   const logHash = await completeShamanJob(
     shaman,
     1n, // TODO: fetch cost from contract
