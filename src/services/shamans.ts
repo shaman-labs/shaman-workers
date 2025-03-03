@@ -30,6 +30,14 @@ export const getShamanAbilityIds = (shamanId: Hex) =>
   worldContract.read.getShamanAbilityIds([shamanId]);
 export const getShamanSourceIds = (shamanId: Hex) =>
   worldContract.read.getShamanSourceIds([shamanId]);
+export const getShamanIdsBySourceId = (sourceId: Hex) =>
+  worldContract.read.getShamanIdsBySourceId([sourceId]);
+
+export const getShamansBySourceId = async (sourceId: Hex) => {
+  // TODO: consider pagination
+  const shamanIds = await getShamanIdsBySourceId(sourceId);
+  return Promise.all(shamanIds.map(getShaman));
+};
 
 export const getShaman = async (shamanId: Hex) => {
   logger.info(`Getting shaman: ${shamanId}`);
@@ -218,6 +226,13 @@ export const processShamanJob = async (
     logger.error(`Error processing shaman job ${shaman.shamanId}:`, error);
     return null;
   }
+};
+
+export const processShamansBySourceId = async (sourceId: Hex) => {
+  // TODO: this will break on large numbers of shamanIds
+  const shamans = await getShamansBySourceId(sourceId);
+  const jobs = shamans.map((shaman) => processShamanJob(shaman, 1n));
+  return Promise.all(jobs);
 };
 
 export const executeShaman = async (shaman: ShamanEntity) => {
