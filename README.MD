@@ -1,7 +1,7 @@
 # Shaman Workers
 
 A Deno-powered server that enables secure execution of dynamic TypeScript code
-stored as Shaman metadata on IPFS. Built with
+stored as Ability metadata on IPFS. Built with
 [MUD](https://github.com/latticexyz/mud), this project demonstrates the power of
 decentralized code execution in a controlled environment.
 
@@ -12,7 +12,7 @@ The system consists of several key components:
 1. **Code Execution Engine**: Leverages Deno's secure runtime to execute
    TypeScript code fetched from IPFS
 2. **Storage Layer**:
-   - IPFS: Stores Shaman metadata and code
+   - IPFS: Stores Ability metadata and code
    - On-chain: Stores Shaman state (active status, balance, creator) via MUD
      Protocol
    - Filebase: Stores execution logs and results
@@ -114,25 +114,25 @@ curl -X POST http://localhost:8000 \
 
 The system will:
 
-1. Fetch Shaman metadata from the blockchain
+1. Fetch Ability metadata from the blockchain
 2. Retrieve code from IPFS
 3. Execute the code in a secure sandbox
 4. Store execution results on Filebase
 5. Log the operation on-chain
 
-#### Shaman Code Format
+#### Ability Code Format
 
 Code stored on IPFS should be a TypeScript function with the following format:
 
 ```typescript
-export default async (context: ShamanContext) => {
+export default async (context: AbilityContext) => {
   const { fetch, publicClient, walletClient } = context;
   // Your code here
   return result;
 };
 ```
 
-The `ShamanContext` provides:
+The `AbilityContext` provides:
 
 - `fetch`: HTTP client
 - `publicClient`: Viem public client for blockchain reads

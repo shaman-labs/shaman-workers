@@ -2,30 +2,30 @@ import { Hono } from "@hono/hono";
 import { isHex } from "viem";
 import { logger } from "../config/logger.ts";
 import {
-  enqueueWorkflowJob,
-  executeWorkflow,
-  startWorkflowJob,
-} from "../services/workflows.ts";
-import { WorkflowRequest } from "../types/common.ts";
+  enqueueShamanJob,
+  executeShaman,
+  startShamanJob,
+} from "../services/shamans.ts";
+import { ShamanRequest } from "../types/common.ts";
 
 const app = new Hono();
 
 app.post("/", async (c) => {
   try {
-    const body: WorkflowRequest = await c.req.json();
+    const body: ShamanRequest = await c.req.json();
 
-    if (!body.workflowId || !isHex(body.workflowId)) {
-      logger.warn("Missing workflowId in request");
-      return c.json({ error: "Missing workflowId in request body" }, 400);
+    if (!body.shamanId || !isHex(body.shamanId)) {
+      logger.warn("Missing shamanId in request");
+      return c.json({ error: "Missing shamanId in request body" }, 400);
     }
 
-    // enqueue workflow job
-    await enqueueWorkflowJob(body.workflowId, 1n);
-    // start workflow job
-    await startWorkflowJob(body.workflowId);
+    // enqueue shaman job
+    await enqueueShamanJob(body.shamanId, 1n);
+    // start shaman job
+    await startShamanJob(body.shamanId);
 
-    // execute workflow
-    const executionResult = await executeWorkflow(body.workflowId);
+    // execute shaman
+    const executionResult = await executeShaman(body.shamanId);
 
     return c.json(executionResult);
   } catch (error) {

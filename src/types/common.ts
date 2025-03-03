@@ -7,13 +7,13 @@ export interface CodeExecutionResult {
   timestamp: number;
 }
 
-export interface WorkflowExecutionResult {
+export interface ShamanExecutionResult {
   success: boolean;
   results: CodeExecutionResult[];
 }
 
-export interface WorkflowRequest {
-  workflowId: Hex;
+export interface ShamanRequest {
+  shamanId: Hex;
 }
 
 export interface Transaction {
