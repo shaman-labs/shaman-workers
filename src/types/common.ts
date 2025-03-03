@@ -21,3 +21,8 @@ export interface Transaction {
   value: number | bigint | string;
   data: Hex;
 }
+
+export interface SourceMessage {
+  sourceId: Hex;
+  context: Record<string, unknown>;
+}
