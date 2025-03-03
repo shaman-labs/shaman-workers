@@ -1,11 +1,7 @@
 import { Hono } from "@hono/hono";
 import { isHex } from "viem";
 import { logger } from "../config/logger.ts";
-import {
-  enqueueShamanJob,
-  executeShaman,
-  startShamanJob,
-} from "../services/shamans.ts";
+import { getShaman, processShamanJob } from "../services/shamans.ts";
 import { ShamanRequest } from "../types/common.ts";
 
 const app = new Hono();
@@ -19,13 +15,9 @@ app.post("/", async (c) => {
       return c.json({ error: "Missing shamanId in request body" }, 400);
     }
 
-    // enqueue shaman job
-    await enqueueShamanJob(body.shamanId, 1n);
-    // start shaman job
-    await startShamanJob(body.shamanId);
+    const shaman = await getShaman(body.shamanId);
 
-    // execute shaman
-    const executionResult = await executeShaman(body.shamanId);
+    const executionResult = await processShamanJob(shaman, 1n);
 
     return c.json(executionResult);
   } catch (error) {
