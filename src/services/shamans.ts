@@ -107,11 +107,18 @@ export const enqueueShamanJob = async (shaman: ShamanEntity, cost: bigint) => {
     },
   );
 
+  const nonce = await publicClient.getTransactionCount({
+    address: operatorAccount.address,
+  });
+
+  logger.info(`Using nonce ${nonce} for enqueueShamanJob transaction`);
+
   const hash = await worldContract.write.enqueueShamanJob(
     [shaman.shamanId, cost],
     {
       chain: arbitrumSepolia,
       account: operatorAccount,
+      nonce,
     },
   );
 
@@ -139,11 +146,18 @@ export const startShamanJob = async (shaman: ShamanEntity) => {
     },
   );
 
+  const nonce = await publicClient.getTransactionCount({
+    address: operatorAccount.address,
+  });
+
+  logger.info(`Using nonce ${nonce} for startShamanJob transaction`);
+
   const hash = await worldContract.write.startShamanJob(
     [shaman.shamanId],
     {
       chain: arbitrumSepolia,
       account: operatorAccount,
+      nonce: nonce,
     },
   );
 
@@ -182,11 +196,18 @@ export const completeShamanJob = async (
     },
   );
 
+  const nonce = await publicClient.getTransactionCount({
+    address: operatorAccount.address,
+  });
+
+  logger.info(`Using nonce ${nonce} for completeShamanJob transaction`);
+
   const hash = await worldContract.write.completeShamanJob(
     [shaman.shamanId, cost, success, metadataHash],
     {
       chain: arbitrumSepolia,
       account: operatorAccount,
+      nonce,
     },
   );
 
