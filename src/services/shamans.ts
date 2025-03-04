@@ -223,7 +223,11 @@ export const processShamanJob = async (
         return null;
     }
   } catch (error) {
-    logger.error(`Error processing shaman job ${shaman.shamanId}:`, error);
+    logger.error(
+      `Error processing shaman job ${shaman.shamanId}: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
     return null;
   }
 };
@@ -285,12 +289,12 @@ export const executeShaman = async (shaman: ShamanEntity) => {
     };
   }
 
-  logger.info(`Uploading operation log to IPFS: ${JSON.stringify(result)}`);
+  logger.info("Uploading operation log to IPFS");
   const { cid: metadataHash } = await upload(result);
   logger.info(`Operation log uploaded to IPFS: ${metadataHash}`);
 
   // Complete shaman
-  logger.info(`Completing shaman: ${JSON.stringify(result)}`);
+  logger.info(`Completing shaman: ${shaman.shamanId}`);
   const logHash = await completeShamanJob(
     shaman,
     1n, // TODO: fetch cost from contract
