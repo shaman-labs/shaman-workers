@@ -27,7 +27,7 @@ export const getShamanState = (shamanId: Hex) =>
 export const getShamanActive = (shamanId: Hex) =>
   worldContract.read.getShamanActive([shamanId]);
 export const getShamanSpellIds = (shamanId: Hex) =>
-  worldContract.read.getShamanAbilityIds([shamanId]);
+  worldContract.read.getShamanSpellIds([shamanId]);
 export const getShamanSourceIds = (shamanId: Hex) =>
   worldContract.read.getShamanSourceIds([shamanId]);
 export const getShamanIdsBySourceId = (sourceId: Hex) =>

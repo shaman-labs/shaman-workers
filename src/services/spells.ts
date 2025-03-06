@@ -5,11 +5,11 @@ import { SpellEntity, SpellMetadata } from "../types/spell.ts";
 import { IPFS_GATEWAY } from "../config/env.ts";
 
 export const getSpellName = (spellId: Hex) =>
-  worldContract.read.getAbilityName([spellId]);
+  worldContract.read.getSpellName([spellId]);
 export const getSpellMetadataHash = (spellId: Hex) =>
-  worldContract.read.getAbilityMetadata([spellId]);
+  worldContract.read.getSpellMetadata([spellId]);
 export const getSpellCreator = (spellId: Hex) =>
-  worldContract.read.getAbilityCreator([spellId]);
+  worldContract.read.getSpellCreator([spellId]);
 
 export const getSpell = async (spellId: Hex) => {
   logger.info(`Getting spell: ${spellId}`);
