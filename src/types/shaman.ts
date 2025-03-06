@@ -1,5 +1,5 @@
 import { Address, Hex } from "viem";
-import { AbilityEntity } from "./ability.ts";
+import { SpellEntity } from "./spell.ts";
 
 export enum ShamanState {
   Idle = 0,
@@ -14,7 +14,7 @@ export interface ShamanEntity {
   shamanActive: boolean;
   shamanBalance: bigint;
   shamanCreator: Address;
-  shamanAbilityIds: string[];
+  shamanSpellIds: string[];
   shamanSourceIds: string[];
-  shamanAbilities: AbilityEntity[];
+  shamanSpells: SpellEntity[];
 }
