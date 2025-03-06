@@ -1,6 +1,6 @@
 import { decodeBase64 } from "jsr:@std/encoding/base64";
 import { logger } from "../config/logger.ts";
-import { AbilityContext } from "../types/ability.ts";
+import { SpellContext } from "../types/spell.ts";
 import { CodeExecutionResult } from "../types/common.ts";
 
 const SEPARATOR = "=".repeat(80);
@@ -12,7 +12,7 @@ function decodeCode(str: string): string {
 
 export async function executeCode(
   code: string,
-  context: AbilityContext,
+  context: SpellContext,
 ): Promise<CodeExecutionResult> {
   try {
     logger.debug("Preparing to execute code");
@@ -27,9 +27,9 @@ export async function executeCode(
     }`;
     logger.debug(`Data URL:\n${SEPARATOR}\n${dataUrl}\n${SEPARATOR}`);
 
-    logger.debug("Importing and executing ability code");
-    const { default: abilityFunction } = await import(dataUrl);
-    const result = await abilityFunction(context);
+    logger.debug("Importing and executing spell code");
+    const { default: spellFunction } = await import(dataUrl);
+    const result = await spellFunction(context);
     logger.debug("Code execution completed successfully");
     logger.debug(
       `Result: ${

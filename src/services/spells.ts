@@ -1,0 +1,56 @@
+import { Hex } from "viem";
+import { worldContract } from "../mud/contract.ts";
+import { logger } from "../config/logger.ts";
+import { SpellEntity, SpellMetadata } from "../types/spell.ts";
+import { IPFS_GATEWAY } from "../config/env.ts";
+
+export const getSpellName = (spellId: Hex) =>
+  worldContract.read.getAbilityName([spellId]);
+export const getSpellMetadataHash = (spellId: Hex) =>
+  worldContract.read.getAbilityMetadata([spellId]);
+export const getSpellCreator = (spellId: Hex) =>
+  worldContract.read.getAbilityCreator([spellId]);
+
+export const getSpell = async (spellId: Hex) => {
+  logger.info(`Getting spell: ${spellId}`);
+  const [spellName, spellMetadataHash, spellCreator] = await Promise.all([
+    getSpellName(spellId),
+    getSpellMetadataHash(spellId),
+    getSpellCreator(spellId),
+  ]);
+
+  const spellMetadata = await getSpellMetadata(spellMetadataHash);
+
+  const spell = {
+    spellId,
+    spellName,
+    spellCreator,
+    spellMetadata,
+  } as SpellEntity;
+
+  logger.info(`Fetched Spell: ${
+    JSON.stringify({
+      spellId,
+      spellName,
+      spellCreator,
+    })
+  }`);
+
+  return spell;
+};
+
+export const getSpellMetadata = async (cid: string) => {
+  // Construct IPFS URL
+  const ipfsUrl = `${IPFS_GATEWAY}${cid}`;
+  logger.info(`Fetching metadata from IPFS: ${ipfsUrl}`);
+
+  // Fetch and process the metadata
+  const response = await fetch(ipfsUrl);
+  if (!response.ok) {
+    logger.error(`Failed to fetch metadata: ${response.status}`);
+    throw new Error(`Failed to fetch metadata: ${response.status}`);
+  }
+
+  const metadata: SpellMetadata = await response.json();
+  return metadata;
+};

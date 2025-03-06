@@ -10,13 +10,13 @@ import { arbitrumSepolia } from "viem/chains";
 import { logger } from "../config/logger.ts";
 import { worldContract } from "../mud/contract.ts";
 import { ShamanExecutionResult } from "../types/common.ts";
-import { AbilityContext, AbilityEntity } from "../types/ability.ts";
+import { SpellContext, SpellEntity } from "../types/spell.ts";
 import { ShamanEntity, ShamanState } from "../types/shaman.ts";
 import { executeCode } from "./codeExecutor.ts";
 import { operatorAccount, publicClient } from "./evm.ts";
 import { upload } from "./filebase.ts";
 import { ServerWalletClient } from "./privy.ts";
-import { getAbility } from "./abilities.ts";
+import { getSpell } from "./spells.ts";
 
 export const getShamanCreator = (shamanId: Hex) =>
   worldContract.read.getShamanCreator([shamanId]);
@@ -26,7 +26,7 @@ export const getShamanState = (shamanId: Hex) =>
   worldContract.read.getShamanState([shamanId]);
 export const getShamanActive = (shamanId: Hex) =>
   worldContract.read.getShamanActive([shamanId]);
-export const getShamanAbilityIds = (shamanId: Hex) =>
+export const getShamanSpellIds = (shamanId: Hex) =>
   worldContract.read.getShamanAbilityIds([shamanId]);
 export const getShamanSourceIds = (shamanId: Hex) =>
   worldContract.read.getShamanSourceIds([shamanId]);
@@ -46,19 +46,19 @@ export const getShaman = async (shamanId: Hex) => {
     shamanBalance,
     shamanState,
     shamanActive,
-    shamanAbilityIds,
+    shamanSpellIds,
     shamanSourceIds,
   ] = await Promise.all([
     getShamanCreator(shamanId),
     getShamanBalance(shamanId),
     getShamanState(shamanId),
     getShamanActive(shamanId),
-    getShamanAbilityIds(shamanId),
+    getShamanSpellIds(shamanId),
     getShamanSourceIds(shamanId),
   ]);
 
-  const shamanAbilities = await Promise.all(
-    shamanAbilityIds.map((abilityId) => getAbility(abilityId)),
+  const shamanSpells = await Promise.all(
+    shamanSpellIds.map((spellId) => getSpell(spellId)),
   );
 
   const shaman = {
@@ -67,9 +67,9 @@ export const getShaman = async (shamanId: Hex) => {
     shamanBalance,
     shamanState,
     shamanActive,
-    shamanAbilityIds,
+    shamanSpellIds,
     shamanSourceIds,
-    shamanAbilities,
+    shamanSpells,
   } as ShamanEntity;
 
   logger.info(`Fetched Shaman: ${
@@ -274,9 +274,9 @@ export const executeShaman = async (shaman: ShamanEntity) => {
     results: [],
   };
 
-  // execute each ability in order
-  let context: AbilityContext = {
-    abilityCreator: zeroAddress,
+  // execute each spell in order
+  let context: SpellContext = {
+    spellCreator: zeroAddress,
     shamanCreator: shaman.shamanCreator,
     fetch,
     publicClient,
@@ -286,15 +286,15 @@ export const executeShaman = async (shaman: ShamanEntity) => {
     parseUnits,
     formatEther,
   };
-  for (const ability of shaman.shamanAbilities) {
-    // add ability creator to context
+  for (const spell of shaman.shamanSpells) {
+    // add spell creator to context
     context = {
       ...context,
-      abilityCreator: ability.abilityCreator,
+      spellCreator: spell.spellCreator,
     };
-    const codeResult = await executeAbility(ability, context);
+    const codeResult = await executeSpell(spell, context);
     logger.info(
-      `Ability ${ability.abilityId} executed, success: ${codeResult.success}`,
+      `Spell ${spell.spellId} executed, success: ${codeResult.success}`,
     );
 
     result.results.push(codeResult);
@@ -327,7 +327,7 @@ export const executeShaman = async (shaman: ShamanEntity) => {
   return result;
 };
 
-export const executeAbility = (
-  ability: AbilityEntity,
-  context: AbilityContext,
-) => executeCode(ability.abilityMetadata.code, context);
+export const executeSpell = (
+  spell: SpellEntity,
+  context: SpellContext,
+) => executeCode(spell.spellMetadata.code, context);

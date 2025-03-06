@@ -9,20 +9,20 @@ import {
 } from "viem";
 import { ServerWalletClient } from "../services/privy.ts";
 
-export interface AbilityMetadata {
+export interface SpellMetadata {
   prompt: string;
   code: string;
   createdAt: string;
 }
 
-export interface AbilityEntity {
-  abilityId: Hex;
-  abilityName: string;
-  abilityCreator: Address;
-  abilityMetadata: AbilityMetadata;
+export interface SpellEntity {
+  spellId: Hex;
+  spellName: string;
+  spellCreator: Address;
+  spellMetadata: SpellMetadata;
 }
 
-export interface AbilityContext {
+export interface SpellContext {
   fetch: typeof fetch;
   publicClient: PublicClient;
   walletClient: ServerWalletClient;
@@ -30,7 +30,7 @@ export interface AbilityContext {
   parseEther: typeof parseEther;
   parseUnits: typeof parseUnits;
   formatEther: typeof formatEther;
-  abilityCreator: Address;
+  spellCreator: Address;
   shamanCreator: Address;
   previousResults?: unknown;
   extraArgs?: unknown;
