@@ -20,7 +20,7 @@ import {
   getShamanSpellVersion,
   getSpell,
 } from "./spells.ts";
-import { apiClient } from "./api.ts";
+import { apiClient, oxApiClient } from "./api.ts";
 
 export const getShamanCreator = (shamanId: Hex) =>
   worldContract.read.getShamanCreator([shamanId]);
@@ -470,6 +470,7 @@ export const executeShaman = async (shaman: ShamanEntity) => {
     spellCreator: zeroAddress,
     shamanCreator: shaman.shamanCreator,
     apiClient,
+    oxApiClient,
     publicClient,
     walletClient,
     viem,

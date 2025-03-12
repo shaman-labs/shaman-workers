@@ -2,7 +2,7 @@ import { Address, Hex, PublicClient } from "viem";
 import * as viem from "viem";
 import { ServerWalletClient } from "../services/privy.ts";
 import { JobState } from "./common.ts";
-import { apiClient } from "../services/api.ts";
+import { apiClient, oxApiClient } from "../services/api.ts";
 
 export interface SpellMetadata {
   prompt: string;
@@ -26,6 +26,7 @@ export interface SpellContext {
   publicClient: PublicClient;
   walletClient: ServerWalletClient;
   apiClient: typeof apiClient;
+  oxApiClient: typeof oxApiClient;
   viem: typeof viem;
   spellCreator: Address; // fetched from contract
   shamanCreator: Address; // fetched from contract
