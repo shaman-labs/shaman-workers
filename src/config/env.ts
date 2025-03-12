@@ -49,3 +49,8 @@ export const S3_BUCKET = Deno.env.get("S3_BUCKET") ?? "";
 assertEnv("S3_KEY", S3_KEY);
 assertEnv("S3_SECRET", S3_SECRET);
 assertEnv("S3_BUCKET", S3_BUCKET);
+
+// Ox Configuration
+export const OX_API_KEY = Deno.env.get("OX_API_KEY") ?? "";
+
+assertEnv("OX_API_KEY", OX_API_KEY);
