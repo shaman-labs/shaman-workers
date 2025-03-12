@@ -2,11 +2,13 @@ import ky from "https://esm.sh/ky";
 
 import { OX_API_KEY } from "../config/env.ts";
 
-export const apiClient = ky.create({
+export const oxApiClient = ky.create({
   headers: {
     "0x-api-key": OX_API_KEY,
   },
 });
+
+export const apiClient = ky.create();
 
 // within spells, we can make requests like this:
 // const response = await apiClient.get("https://example.com").json();
