@@ -9,14 +9,23 @@ import {
 import { arbitrumSepolia } from "viem/chains";
 import { logger } from "../config/logger.ts";
 import { worldContract } from "../mud/contract.ts";
-import { ShamanExecutionResult } from "../types/common.ts";
-import { SpellContext, SpellEntity } from "../types/spell.ts";
-import { ShamanEntity, ShamanState } from "../types/shaman.ts";
+import {
+  CodeExecutionResult,
+  JobState,
+  ShamanExecutionResult,
+} from "../types/common.ts";
+import { ShamanSpellEntity, SpellContext } from "../types/spell.ts";
+import { ShamanEntity } from "../types/shaman.ts";
 import { executeCode } from "./codeExecutor.ts";
 import { operatorAccount, publicClient } from "./evm.ts";
 import { upload } from "./filebase.ts";
 import { ServerWalletClient } from "./privy.ts";
-import { getSpell } from "./spells.ts";
+import {
+  getShamanSpellMetadataHash,
+  getShamanSpellState,
+  getShamanSpellVersion,
+  getSpell,
+} from "./spells.ts";
 
 export const getShamanCreator = (shamanId: Hex) =>
   worldContract.read.getShamanCreator([shamanId]);
@@ -58,7 +67,21 @@ export const getShaman = async (shamanId: Hex) => {
   ]);
 
   const shamanSpells = await Promise.all(
-    shamanSpellIds.map((spellId) => getSpell(spellId)),
+    shamanSpellIds.map(async (spellId) => {
+      const spell = await getSpell(spellId);
+      const spellMetadataHash = await getShamanSpellMetadataHash(
+        shamanId,
+        spellId,
+      );
+      const spellVersion = await getShamanSpellVersion(shamanId, spellId);
+      const spellState = await getShamanSpellState(shamanId, spellId);
+      return {
+        ...spell,
+        spellMetadataHash,
+        spellVersion,
+        spellState,
+      } as ShamanSpellEntity;
+    }),
   );
 
   const shaman = {
@@ -85,23 +108,17 @@ export const getShaman = async (shamanId: Hex) => {
   return shaman;
 };
 
-export const enqueueShamanJob = async (shaman: ShamanEntity, cost: bigint) => {
-  if (shaman.shamanBalance < cost) {
-    throw new Error(
-      `Shaman has insufficient balance: ${shaman.shamanId}, Balance: ${shaman.shamanBalance.toString()}, Cost: ${cost.toString()}`,
-    );
-  }
-
+export const enqueueShamanJob = async (shaman: ShamanEntity) => {
   if (!shaman.shamanActive) {
     throw new Error(`Shaman is not active: ${shaman.shamanId}`);
   }
 
-  if (shaman.shamanState !== ShamanState.Idle) {
+  if (shaman.shamanState !== JobState.Idle) {
     throw new Error(`Shaman is not idle: ${shaman.shamanId}`);
   }
 
   await worldContract.simulate.enqueueShamanJob(
-    [shaman.shamanId, cost],
+    [shaman.shamanId],
     {
       account: operatorAccount.address,
     },
@@ -114,7 +131,7 @@ export const enqueueShamanJob = async (shaman: ShamanEntity, cost: bigint) => {
   logger.info(`Using nonce ${nonce} for enqueueShamanJob transaction`);
 
   const hash = await worldContract.write.enqueueShamanJob(
-    [shaman.shamanId, cost],
+    [shaman.shamanId],
     {
       chain: arbitrumSepolia,
       account: operatorAccount,
@@ -125,7 +142,7 @@ export const enqueueShamanJob = async (shaman: ShamanEntity, cost: bigint) => {
   await publicClient.waitForTransactionReceipt({ hash });
 
   // mark shaman instance as enqueued
-  shaman.shamanState = ShamanState.Queue;
+  shaman.shamanState = JobState.Queue;
 
   return hash;
 };
@@ -135,7 +152,7 @@ export const startShamanJob = async (shaman: ShamanEntity) => {
     throw new Error(`Shaman is not active: ${shaman.shamanId}`);
   }
 
-  if (shaman.shamanState !== ShamanState.Queue) {
+  if (shaman.shamanState !== JobState.Queue) {
     throw new Error(`Shaman is not in queue: ${shaman.shamanId}`);
   }
 
@@ -164,33 +181,26 @@ export const startShamanJob = async (shaman: ShamanEntity) => {
   await publicClient.waitForTransactionReceipt({ hash });
 
   // mark shaman instance as in progress
-  shaman.shamanState = ShamanState.InProgress;
+  shaman.shamanState = JobState.InProgress;
 
   return hash;
 };
 
 export const completeShamanJob = async (
   shaman: ShamanEntity,
-  cost: bigint,
   metadataHash: string,
   success: boolean,
 ) => {
-  if (shaman.shamanBalance < cost) {
-    throw new Error(
-      `Shaman has insufficient balance: ${shaman.shamanId}, Balance: ${shaman.shamanBalance.toString()}, Cost: ${cost.toString()}`,
-    );
-  }
-
   if (!shaman.shamanActive) {
     throw new Error(`Shaman is not active: ${shaman.shamanId}`);
   }
 
-  if (shaman.shamanState !== ShamanState.InProgress) {
+  if (shaman.shamanState !== JobState.InProgress) {
     throw new Error(`Shaman is not in progress: ${shaman.shamanId}`);
   }
 
   await worldContract.simulate.completeShamanJob(
-    [shaman.shamanId, cost, success, metadataHash],
+    [shaman.shamanId, success, metadataHash],
     {
       account: operatorAccount.address,
     },
@@ -203,7 +213,7 @@ export const completeShamanJob = async (
   logger.info(`Using nonce ${nonce} for completeShamanJob transaction`);
 
   const hash = await worldContract.write.completeShamanJob(
-    [shaman.shamanId, cost, success, metadataHash],
+    [shaman.shamanId, success, metadataHash],
     {
       chain: arbitrumSepolia,
       account: operatorAccount,
@@ -214,27 +224,26 @@ export const completeShamanJob = async (
   await publicClient.waitForTransactionReceipt({ hash });
 
   // mark shaman instance as Idle after completion
-  shaman.shamanState = ShamanState.Idle;
+  shaman.shamanState = JobState.Idle;
 
   return hash;
 };
 
 export const processShamanJob = async (
   shaman: ShamanEntity,
-  cost: bigint,
 ): Promise<ShamanExecutionResult | null> => {
   try {
     switch (shaman.shamanState) {
-      case ShamanState.Idle:
-        await enqueueShamanJob(shaman, cost);
+      case JobState.Idle:
+        await enqueueShamanJob(shaman);
         await startShamanJob(shaman);
         return executeShaman(shaman);
-      case ShamanState.Queue:
+      case JobState.Queue:
         await startShamanJob(shaman);
         return executeShaman(shaman);
-      case ShamanState.InProgress:
+      case JobState.InProgress:
         return executeShaman(shaman);
-      case ShamanState.Completed:
+      case JobState.Completed:
         logger.warn(`Shaman ${shaman.shamanId} is already completed`);
         return null;
       default:
@@ -256,12 +265,199 @@ export const processShamanJob = async (
 export const processShamansBySourceId = async (sourceId: Hex) => {
   // TODO: this will break on large numbers of shamanIds
   const shamans = await getShamansBySourceId(sourceId);
-  const jobs = shamans.map((shaman) => processShamanJob(shaman, 1n));
+  const jobs = shamans.map((shaman) => processShamanJob(shaman));
   return Promise.all(jobs);
 };
 
+export const enqueueSpellJob = async (
+  shaman: ShamanEntity,
+  spell: ShamanSpellEntity,
+  cost: bigint,
+) => {
+  if (shaman.shamanBalance < cost) {
+    throw new Error(
+      `Shaman has insufficient balance: ${shaman.shamanId}, Balance: ${shaman.shamanBalance.toString()}, Cost: ${cost.toString()}`,
+    );
+  }
+
+  if (!shaman.shamanActive) {
+    throw new Error(`Shaman is not active: ${shaman.shamanId}`);
+  }
+
+  if (shaman.shamanState !== JobState.InProgress) {
+    throw new Error(`Shaman is not in progress: ${shaman.shamanId}`);
+  }
+
+  if (spell.spellState !== JobState.Idle) {
+    throw new Error(`Spell is not idle: ${spell.spellId}`);
+  }
+
+  await worldContract.simulate.enqueueSpellJob(
+    [shaman.shamanId, spell.spellId, cost],
+    {
+      account: operatorAccount.address,
+    },
+  );
+
+  const nonce = await publicClient.getTransactionCount({
+    address: operatorAccount.address,
+  });
+
+  logger.info(`Using nonce ${nonce} for enqueueSpellJob transaction`);
+
+  const hash = await worldContract.write.enqueueSpellJob(
+    [shaman.shamanId, spell.spellId, cost],
+    {
+      chain: arbitrumSepolia,
+      account: operatorAccount,
+      nonce,
+    },
+  );
+
+  await publicClient.waitForTransactionReceipt({ hash });
+
+  // mark spell instance as in progress
+  spell.spellState = JobState.Queue;
+  return hash;
+};
+
+export const startSpellJob = async (
+  shaman: ShamanEntity,
+  spell: ShamanSpellEntity,
+) => {
+  if (!shaman.shamanActive) {
+    throw new Error(`Shaman is not active: ${shaman.shamanId}`);
+  }
+
+  if (shaman.shamanState !== JobState.InProgress) {
+    throw new Error(`Shaman is not in progress: ${shaman.shamanId}`);
+  }
+
+  if (spell.spellState !== JobState.Queue) {
+    throw new Error(`Spell is not in queue: ${spell.spellId}`);
+  }
+
+  await worldContract.simulate.startSpellJob(
+    [shaman.shamanId, spell.spellId],
+    {
+      account: operatorAccount.address,
+    },
+  );
+
+  const nonce = await publicClient.getTransactionCount({
+    address: operatorAccount.address,
+  });
+
+  logger.info(`Using nonce ${nonce} for startSpellJob transaction`);
+
+  const hash = await worldContract.write.startSpellJob(
+    [shaman.shamanId, spell.spellId],
+    {
+      chain: arbitrumSepolia,
+      account: operatorAccount,
+      nonce,
+    },
+  );
+
+  await publicClient.waitForTransactionReceipt({ hash });
+
+  // mark spell instance as in progress
+  spell.spellState = JobState.InProgress;
+  return hash;
+};
+
+export const completeSpellJob = async (
+  shaman: ShamanEntity,
+  spell: ShamanSpellEntity,
+  metadataHash: string,
+  success: boolean,
+  cost: bigint,
+) => {
+  if (shaman.shamanBalance < cost) {
+    throw new Error(
+      `Shaman has insufficient balance: ${shaman.shamanId}, Balance: ${shaman.shamanBalance.toString()}, Cost: ${cost.toString()}`,
+    );
+  }
+
+  if (!shaman.shamanActive) {
+    throw new Error(`Shaman is not active: ${shaman.shamanId}`);
+  }
+
+  if (shaman.shamanState !== JobState.InProgress) {
+    throw new Error(`Shaman is not in progress: ${shaman.shamanId}`);
+  }
+
+  if (spell.spellState !== JobState.InProgress) {
+    throw new Error(`Spell is not in progress: ${spell.spellId}`);
+  }
+
+  await worldContract.simulate.completeSpellJob(
+    [shaman.shamanId, spell.spellId, cost, success, metadataHash],
+    {
+      account: operatorAccount.address,
+    },
+  );
+
+  const nonce = await publicClient.getTransactionCount({
+    address: operatorAccount.address,
+  });
+
+  logger.info(`Using nonce ${nonce} for completeSpellJob transaction`);
+
+  const hash = await worldContract.write.completeSpellJob(
+    [shaman.shamanId, spell.spellId, cost, success, metadataHash],
+    {
+      chain: arbitrumSepolia,
+      account: operatorAccount,
+      nonce,
+    },
+  );
+
+  await publicClient.waitForTransactionReceipt({ hash });
+
+  // mark spell instance as idle after completion
+  spell.spellState = JobState.Idle;
+
+  return hash;
+};
+
+export const processSpellJob = async (
+  shaman: ShamanEntity,
+  spell: ShamanSpellEntity,
+  context: SpellContext,
+): Promise<CodeExecutionResult | null> => {
+  try {
+    switch (spell.spellState) {
+      case JobState.Idle:
+        await enqueueSpellJob(shaman, spell, 1n);
+        await startSpellJob(shaman, spell);
+        return executeSpell(spell, context);
+      case JobState.Queue:
+        await startSpellJob(shaman, spell);
+        return executeSpell(spell, context);
+      case JobState.InProgress:
+        return executeSpell(spell, context);
+      case JobState.Completed:
+        logger.warn(`Spell ${spell.spellId} is already completed`);
+        return null;
+      default:
+        logger.warn(
+          `Spell ${spell.spellId} is in an invalid state: ${spell.spellState}`,
+        );
+        return null;
+    }
+  } catch (error) {
+    logger.error(
+      `Error processing spell job ${spell.spellId}: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+    return null;
+  }
+};
+
 export const executeShaman = async (shaman: ShamanEntity) => {
-  if (shaman.shamanState !== ShamanState.InProgress) {
+  if (shaman.shamanState !== JobState.InProgress) {
     throw new Error(`Shaman is not in progress: ${shaman.shamanId}`);
   }
   const walletClient = new ServerWalletClient(
@@ -292,10 +488,32 @@ export const executeShaman = async (shaman: ShamanEntity) => {
       ...context,
       spellCreator: spell.spellCreator,
     };
-    const codeResult = await executeSpell(spell, context);
+
+    const codeResult = await processSpellJob(shaman, spell, context);
+    if (!codeResult) {
+      logger.error(`Spell ${spell.spellId} failed to execute`);
+      break;
+    }
+
     logger.info(
       `Spell ${spell.spellId} executed, success: ${codeResult.success}`,
     );
+
+    logger.info("Uploading operation log to IPFS");
+    const { cid: metadataHash } = await upload(result);
+    logger.info(`Operation log uploaded to IPFS: ${metadataHash}`);
+
+    // Complete spell
+    logger.info(`Completing spell: ${spell.spellId}`);
+    const logHash = await completeSpellJob(
+      shaman,
+      spell,
+      metadataHash,
+      result.success,
+      1n,
+    );
+
+    logger.info(`Spell ${spell.spellId} completed: ${logHash}`);
 
     result.results.push(codeResult);
     result.success = codeResult.success;
@@ -318,7 +536,6 @@ export const executeShaman = async (shaman: ShamanEntity) => {
   logger.info(`Completing shaman: ${shaman.shamanId}`);
   const logHash = await completeShamanJob(
     shaman,
-    1n, // TODO: fetch cost from contract
     metadataHash,
     result.success,
   );
@@ -328,6 +545,6 @@ export const executeShaman = async (shaman: ShamanEntity) => {
 };
 
 export const executeSpell = (
-  spell: SpellEntity,
+  spell: ShamanSpellEntity,
   context: SpellContext,
 ) => executeCode(spell.spellMetadata.code, context);

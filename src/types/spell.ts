@@ -8,6 +8,7 @@ import {
   PublicClient,
 } from "viem";
 import { ServerWalletClient } from "../services/privy.ts";
+import { JobState } from "./common.ts";
 
 export interface SpellMetadata {
   prompt: string;
@@ -20,6 +21,11 @@ export interface SpellEntity {
   spellName: string;
   spellCreator: Address;
   spellMetadata: SpellMetadata;
+}
+
+export interface ShamanSpellEntity extends SpellEntity {
+  spellVersion: bigint;
+  spellState: JobState;
 }
 
 export interface SpellContext {
