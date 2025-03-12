@@ -17,7 +17,7 @@ app.post("/", async (c) => {
 
     const shaman = await getShaman(body.shamanId);
 
-    const executionResult = await processShamanJob(shaman, 1n);
+    const executionResult = await processShamanJob(shaman);
 
     return c.json(executionResult);
   } catch (error) {

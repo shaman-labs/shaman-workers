@@ -1,5 +1,12 @@
 import { Hex } from "viem";
 
+export enum JobState {
+  Idle = 0,
+  Queue = 1,
+  InProgress = 2,
+  Completed = 3,
+}
+
 export interface CodeExecutionResult {
   success: boolean;
   decodedCode?: string;

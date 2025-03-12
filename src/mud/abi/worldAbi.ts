@@ -165,6 +165,34 @@ export const worldAbi = [
         "internalType": "bytes32",
       },
       {
+        "name": "success",
+        "type": "bool",
+        "internalType": "bool",
+      },
+      {
+        "name": "metadata",
+        "type": "string",
+        "internalType": "string",
+      },
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable",
+  },
+  {
+    "type": "function",
+    "name": "completeSpellJob",
+    "inputs": [
+      {
+        "name": "shamanId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+      {
+        "name": "spellId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+      {
         "name": "cost",
         "type": "uint256",
         "internalType": "uint256",
@@ -307,6 +335,24 @@ export const worldAbi = [
     "inputs": [
       {
         "name": "shamanId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable",
+  },
+  {
+    "type": "function",
+    "name": "enqueueSpellJob",
+    "inputs": [
+      {
+        "name": "shamanId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+      {
+        "name": "spellId",
         "type": "bytes32",
         "internalType": "bytes32",
       },
@@ -826,6 +872,78 @@ export const worldAbi = [
   },
   {
     "type": "function",
+    "name": "getShamanSpellMetadata",
+    "inputs": [
+      {
+        "name": "shamanId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+      {
+        "name": "spellId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "string",
+        "internalType": "string",
+      },
+    ],
+    "stateMutability": "view",
+  },
+  {
+    "type": "function",
+    "name": "getShamanSpellState",
+    "inputs": [
+      {
+        "name": "shamanId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+      {
+        "name": "spellId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint8",
+        "internalType": "enum JobState",
+      },
+    ],
+    "stateMutability": "view",
+  },
+  {
+    "type": "function",
+    "name": "getShamanSpellVersion",
+    "inputs": [
+      {
+        "name": "shamanId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+      {
+        "name": "spellId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256",
+      },
+    ],
+    "stateMutability": "view",
+  },
+  {
+    "type": "function",
     "name": "getShamanState",
     "inputs": [
       {
@@ -838,7 +956,7 @@ export const worldAbi = [
       {
         "name": "",
         "type": "uint8",
-        "internalType": "enum ShamanState",
+        "internalType": "enum JobState",
       },
     ],
     "stateMutability": "view",
@@ -889,6 +1007,49 @@ export const worldAbi = [
         "name": "spellId",
         "type": "bytes32",
         "internalType": "bytes32",
+      },
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "string",
+        "internalType": "string",
+      },
+    ],
+    "stateMutability": "view",
+  },
+  {
+    "type": "function",
+    "name": "getSpellVersion",
+    "inputs": [
+      {
+        "name": "spellId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint32",
+        "internalType": "uint32",
+      },
+    ],
+    "stateMutability": "view",
+  },
+  {
+    "type": "function",
+    "name": "getSpellVersionMetadata",
+    "inputs": [
+      {
+        "name": "spellId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+      {
+        "name": "version",
+        "type": "uint32",
+        "internalType": "uint32",
       },
     ],
     "outputs": [
@@ -1602,6 +1763,24 @@ export const worldAbi = [
     "inputs": [
       {
         "name": "shamanId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable",
+  },
+  {
+    "type": "function",
+    "name": "startSpellJob",
+    "inputs": [
+      {
+        "name": "shamanId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+      {
+        "name": "spellId",
         "type": "bytes32",
         "internalType": "bytes32",
       },

@@ -10,6 +10,12 @@ export const getSpellMetadataHash = (spellId: Hex) =>
   worldContract.read.getSpellMetadata([spellId]);
 export const getSpellCreator = (spellId: Hex) =>
   worldContract.read.getSpellCreator([spellId]);
+export const getShamanSpellMetadataHash = (shamanId: Hex, spellId: Hex) =>
+  worldContract.read.getShamanSpellMetadata([shamanId, spellId]);
+export const getShamanSpellVersion = (shamanId: Hex, spellId: Hex) =>
+  worldContract.read.getShamanSpellVersion([shamanId, spellId]);
+export const getShamanSpellState = (shamanId: Hex, spellId: Hex) =>
+  worldContract.read.getShamanSpellState([shamanId, spellId]);
 
 export const getSpell = async (spellId: Hex) => {
   logger.info(`Getting spell: ${spellId}`);
