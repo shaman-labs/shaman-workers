@@ -509,7 +509,7 @@ export const executeShaman = async (shaman: ShamanEntity) => {
       shaman,
       spell,
       metadataHash,
-      result.success,
+      codeResult.success,
       1n,
     );
 
