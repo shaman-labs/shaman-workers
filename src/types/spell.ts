@@ -1,14 +1,8 @@
-import {
-  Address,
-  encodeFunctionData,
-  formatEther,
-  Hex,
-  parseEther,
-  parseUnits,
-  PublicClient,
-} from "viem";
+import { Address, Hex, PublicClient } from "viem";
+import * as viem from "viem";
 import { ServerWalletClient } from "../services/privy.ts";
 import { JobState } from "./common.ts";
+import { apiClient } from "../services/api.ts";
 
 export interface SpellMetadata {
   prompt: string;
@@ -29,15 +23,12 @@ export interface ShamanSpellEntity extends SpellEntity {
 }
 
 export interface SpellContext {
-  fetch: typeof fetch;
   publicClient: PublicClient;
   walletClient: ServerWalletClient;
-  encodeFunctionData: typeof encodeFunctionData;
-  parseEther: typeof parseEther;
-  parseUnits: typeof parseUnits;
-  formatEther: typeof formatEther;
-  spellCreator: Address;
-  shamanCreator: Address;
-  previousResults?: unknown;
-  extraArgs?: unknown;
+  apiClient: typeof apiClient;
+  viem: typeof viem;
+  spellCreator: Address; // fetched from contract
+  shamanCreator: Address; // fetched from contract
+  previousResults?: unknown; // previous spell results
+  extraArgs?: unknown; // extra arguments for the spell
 }

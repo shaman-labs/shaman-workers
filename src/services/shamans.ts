@@ -1,11 +1,5 @@
-import {
-  encodeFunctionData,
-  formatEther,
-  Hex,
-  parseEther,
-  parseUnits,
-  zeroAddress,
-} from "viem";
+import { Hex, zeroAddress } from "viem";
+import * as viem from "viem";
 import { arbitrumSepolia } from "viem/chains";
 import { logger } from "../config/logger.ts";
 import { worldContract } from "../mud/contract.ts";
@@ -26,6 +20,7 @@ import {
   getShamanSpellVersion,
   getSpell,
 } from "./spells.ts";
+import { apiClient } from "./api.ts";
 
 export const getShamanCreator = (shamanId: Hex) =>
   worldContract.read.getShamanCreator([shamanId]);
@@ -474,13 +469,10 @@ export const executeShaman = async (shaman: ShamanEntity) => {
   let context: SpellContext = {
     spellCreator: zeroAddress,
     shamanCreator: shaman.shamanCreator,
-    fetch,
+    apiClient,
     publicClient,
     walletClient,
-    encodeFunctionData,
-    parseEther,
-    parseUnits,
-    formatEther,
+    viem,
   };
   for (const spell of shaman.shamanSpells) {
     // add spell creator to context
