@@ -493,7 +493,7 @@ export const executeShaman = async (shaman: ShamanEntity) => {
     );
 
     logger.info("Uploading operation log to IPFS");
-    const { cid: metadataHash } = await upload(result);
+    const { cid: metadataHash } = await upload(codeResult);
     logger.info(`Operation log uploaded to IPFS: ${metadataHash}`);
 
     // Complete spell
