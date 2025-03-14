@@ -7,6 +7,7 @@ import {
   CodeExecutionResult,
   JobState,
   ShamanExecutionResult,
+  SourceMessage,
 } from "../types/common.ts";
 import { ShamanSpellEntity, SpellContext } from "../types/spell.ts";
 import { ShamanEntity } from "../types/shaman.ts";
@@ -21,6 +22,7 @@ import {
   getSpell,
 } from "./spells.ts";
 import { apiClient, oxApiClient } from "./api.ts";
+import { Source, SourceIds } from "../types/source.ts";
 
 export const getShamanCreator = (shamanId: Hex) =>
   worldContract.read.getShamanCreator([shamanId]);
@@ -257,9 +259,17 @@ export const processShamanJob = async (
   }
 };
 
-export const processShamansBySourceId = async (sourceId: Hex) => {
+export const processShamansBySource = async (msg: SourceMessage) => {
+  if (msg.sourceId === SourceIds[Source.MANUAL]) {
+    const shamanId = msg.context["shamanId"] as Hex;
+    if (!shamanId) {
+      throw new Error("Error executing manual shaman: Shaman ID is required");
+    }
+    const shaman = await getShaman(shamanId);
+    return processShamanJob(shaman);
+  }
   // TODO: this will break on large numbers of shamanIds
-  const shamans = await getShamansBySourceId(sourceId);
+  const shamans = await getShamansBySourceId(msg.sourceId);
   const jobs = shamans.map((shaman) => processShamanJob(shaman));
   return Promise.all(jobs);
 };

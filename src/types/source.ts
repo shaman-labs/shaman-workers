@@ -1,15 +1,17 @@
 import { Hex, keccak256, toBytes } from "viem";
 
-export enum IntervalSource {
+export enum Source {
   HOURLY = "interval-hourly",
   DAILY = "interval-daily",
   QUARTER_HOURLY = "interval-quarter-hourly",
+  MANUAL = "manual",
 }
 
-export const IntervalSourceId: Record<IntervalSource, Hex> = {
-  [IntervalSource.HOURLY]: keccak256(toBytes(IntervalSource.HOURLY)),
-  [IntervalSource.DAILY]: keccak256(toBytes(IntervalSource.DAILY)),
-  [IntervalSource.QUARTER_HOURLY]: keccak256(
-    toBytes(IntervalSource.QUARTER_HOURLY),
+export const SourceIds: Record<Source, Hex> = {
+  [Source.HOURLY]: keccak256(toBytes(Source.HOURLY)),
+  [Source.DAILY]: keccak256(toBytes(Source.DAILY)),
+  [Source.QUARTER_HOURLY]: keccak256(
+    toBytes(Source.QUARTER_HOURLY),
   ),
+  [Source.MANUAL]: keccak256(toBytes(Source.MANUAL)),
 } as const;
