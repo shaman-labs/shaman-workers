@@ -1,8 +1,9 @@
 import { Hono } from "@hono/hono";
 import { isHex } from "viem";
 import { logger } from "../config/logger.ts";
-import { getShaman, processShamanJob } from "../services/shamans.ts";
 import { ShamanRequest } from "../types/common.ts";
+import { Source, SourceIds } from "../types/source.ts";
+import { enqueueFromSource } from "../queues/source.ts";
 
 const app = new Hono();
 
@@ -15,11 +16,11 @@ app.post("/", async (c) => {
       return c.json({ error: "Missing shamanId in request body" }, 400);
     }
 
-    const shaman = await getShaman(body.shamanId);
+    const result = await enqueueFromSource(SourceIds[Source.MANUAL], {
+      shamanId: body.shamanId,
+    });
 
-    const executionResult = await processShamanJob(shaman);
-
-    return c.json(executionResult);
+    return c.json(result, 201);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     logger.error(`Error processing request: ${message}`);

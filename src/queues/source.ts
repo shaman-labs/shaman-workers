@@ -1,7 +1,7 @@
 import { Hex } from "viem";
 import { logger } from "../config/logger.ts";
 import { SourceMessage } from "../types/common.ts";
-import { processShamansBySourceId } from "../services/shamans.ts";
+import { processShamansBySource } from "../services/shamans.ts";
 
 const kv = await Deno.openKv();
 
@@ -20,7 +20,7 @@ export const listenForSourceMessages = () => {
   kv.listenQueue((msg: SourceMessage) => {
     // TODO: this will break on large numbers of shamanIds
     logger.info(`Received source message: ${msg.sourceId}`);
-    processShamansBySourceId(msg.sourceId);
+    processShamansBySource(msg);
   });
 };
 

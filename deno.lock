@@ -2627,6 +2627,7 @@
     "https://deno.land/x/emit@0.40.0/mod.ts": "04b1818a60d6f85ca991bc4369634ea55d51388c4154b0100dfbe3c9684e2318",
     "https://docs.deno.com/examples/scripts/hello_world.ts": "b7397985e0acb349b7e69a7cc643c334681eef32a0c426918809d3cc6b36906c",
     "https://esm.sh/ky@1.7.5": "126f2d1859809d1ea59af0b567d547f662c149ab6a8992ced4e1eedec6521cf5",
+    "https://esm.sh/ky@1.7.5/denonext/ky.mjs": "9887af60cd8a7bc0e53a456c0da62e9f59c37fb79e01152b85e699df050fc4b7",
     "https://shaman-proxy.deno.dev/QmTPvPphAhx9GWwNnyczR6nsniiXwjavbpbdQcfuPR6uSK": "f0d6970ecf4c01fe86c95a17834ff1fcf53f9a8c809fa90fa5cb96cc3b1edb83",
     "https://shaman.fun/api/proxy/Qmcd8UhXZKzo36dBPKgBP91ADANqTUHUsPV9vnt4NrbKcX": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
   },
