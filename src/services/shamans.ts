@@ -20,6 +20,7 @@ import {
   getShamanSpellState,
   getShamanSpellVersion,
   getSpell,
+  getSpellMetadata,
 } from "./spells.ts";
 import { apiClient, oxApiClient } from "./api.ts";
 import { Source, SourceIds } from "../types/source.ts";
@@ -70,10 +71,12 @@ export const getShaman = async (shamanId: Hex) => {
         shamanId,
         spellId,
       );
+      const spellMetadata = await getSpellMetadata(spellMetadataHash);
       const spellVersion = await getShamanSpellVersion(shamanId, spellId);
       const spellState = await getShamanSpellState(shamanId, spellId);
       return {
         ...spell,
+        spellMetadata,
         spellMetadataHash,
         spellVersion,
         spellState,

@@ -19,19 +19,15 @@ export const getShamanSpellState = (shamanId: Hex, spellId: Hex) =>
 
 export const getSpell = async (spellId: Hex) => {
   logger.info(`Getting spell: ${spellId}`);
-  const [spellName, spellMetadataHash, spellCreator] = await Promise.all([
+  const [spellName, spellCreator] = await Promise.all([
     getSpellName(spellId),
-    getSpellMetadataHash(spellId),
     getSpellCreator(spellId),
   ]);
-
-  const spellMetadata = await getSpellMetadata(spellMetadataHash);
 
   const spell = {
     spellId,
     spellName,
     spellCreator,
-    spellMetadata,
   } as SpellEntity;
 
   logger.info(`Fetched Spell: ${
