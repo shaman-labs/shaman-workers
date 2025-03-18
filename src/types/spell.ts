@@ -31,5 +31,5 @@ export interface SpellContext {
   spellCreator: Address; // fetched from contract
   shamanCreator: Address; // fetched from contract
   previousResults?: unknown; // previous spell results
-  extraArgs?: unknown; // extra arguments for the spell
+  secrets?: unknown; // user secrets
 }
