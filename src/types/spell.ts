@@ -14,12 +14,12 @@ export interface SpellEntity {
   spellId: Hex;
   spellName: string;
   spellCreator: Address;
-  spellMetadata: SpellMetadata;
 }
 
 export interface ShamanSpellEntity extends SpellEntity {
   spellVersion: bigint;
   spellState: JobState;
+  spellMetadata: SpellMetadata;
 }
 
 export interface SpellContext {
