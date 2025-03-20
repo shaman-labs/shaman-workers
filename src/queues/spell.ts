@@ -16,6 +16,7 @@ import { publishShamanMessage } from "./shaman.ts";
 import { ServerWalletClient } from "../services/privy.ts";
 import { apiClient, oxApiClient } from "../services/api.ts";
 import { publicClient } from "../services/evm.ts";
+import { getSecrets } from "../services/secrets.ts";
 
 export const publishSpellMessage = (message: SpellMessage) => {
   const { spellId } = message;
@@ -63,6 +64,9 @@ export const handleSpellMessage = async (msg: SpellMessage) => {
         arbitrumSepolia.id,
       );
 
+      // Get user secrets
+      const secrets = await getSecrets(spell.spellCreator);
+
       // Create base context for spell execution
       const context = {
         spellCreator: spell.spellCreator,
@@ -78,6 +82,7 @@ export const handleSpellMessage = async (msg: SpellMessage) => {
             },
             {},
           ),
+        secrets,
         apiClient,
         oxApiClient,
         publicClient,
