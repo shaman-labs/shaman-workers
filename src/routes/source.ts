@@ -1,6 +1,6 @@
 import { Hono } from "@hono/hono";
 import { logger } from "../config/logger.ts";
-import { enqueueFromSource } from "../queues/source.ts";
+import { publishSourceMessage } from "../queues/source.ts";
 import { Hex } from "viem";
 
 const app = new Hono();
@@ -8,7 +8,7 @@ const app = new Hono();
 app.post("/:sourceId", async (c) => {
   try {
     const body: Record<string, unknown> = await c.req.json();
-    const result = await enqueueFromSource(
+    const result = await publishSourceMessage(
       c.req.param("sourceId") as Hex,
       body,
     );
