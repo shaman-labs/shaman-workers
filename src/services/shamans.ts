@@ -1,19 +1,20 @@
-import * as viem from "viem";
-import { Hex, zeroAddress } from "viem";
+import { Hex } from "viem";
 import { arbitrumSepolia } from "viem/chains";
 import { logger } from "../config/logger.ts";
 import { worldContract } from "../mud/contract.ts";
+import { publishShamanMessage } from "../queues/shaman.ts";
+import { publishSpellMessage } from "../queues/spell.ts";
 import {
   CodeExecutionResult,
   JobState,
   ShamanExecutionResult,
 } from "../types/common.ts";
+import { SourceMessage } from "../types/queue.ts";
 import { ShamanEntity } from "../types/shaman.ts";
 import { Source, SourceIds } from "../types/source.ts";
 import { ShamanSpellEntity } from "../types/spell.ts";
-import { apiClient, oxApiClient } from "./api.ts";
 import { operatorAccount, publicClient } from "./evm.ts";
-import { ServerWalletClient } from "./privy.ts";
+import { upload } from "./filebase.ts";
 import {
   getShamanSpellMetadataHash,
   getShamanSpellState,
@@ -21,10 +22,6 @@ import {
   getSpell,
   getSpellMetadata,
 } from "./spells.ts";
-import { upload } from "./filebase.ts";
-import { publishShamanMessage } from "../queues/shaman.ts";
-import { publishSpellMessage } from "../queues/spell.ts";
-import { SourceMessage } from "../types/queue.ts";
 
 export const getShamanCreator = (shamanId: Hex) =>
   worldContract.read.getShamanCreator([shamanId]);
@@ -250,38 +247,14 @@ export const processShamansBySource = async (
 };
 
 export const startSpellChain = (shaman: ShamanEntity) => {
-  // Create wallet client
-  const walletClient = new ServerWalletClient(
-    shaman.shamanCreator,
-    arbitrumSepolia.id,
-  );
-
-  // Create base context for spell execution
-  const baseContext = {
-    spellCreator: zeroAddress,
-    shamanCreator: shaman.shamanCreator,
-    apiClient,
-    oxApiClient,
-    publicClient,
-    walletClient,
-    viem,
-  };
-
   // Get the first spell
   const firstSpell = shaman.shamanSpells[0];
-
-  // Add spell-specific context
-  const spellContext = {
-    ...baseContext,
-    spellCreator: firstSpell.spellCreator,
-  };
 
   // Publish spell message to begin execution
   const hasMoreSpells = shaman.shamanSpells.length > 1;
   return publishSpellMessage({
     shamanId: shaman.shamanId,
     spellId: firstSpell.spellId,
-    context: spellContext,
     nextSpellIndex: hasMoreSpells ? 1 : undefined,
   });
 };

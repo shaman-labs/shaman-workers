@@ -35,20 +35,24 @@ class EventQueue {
    *
    * @param handlers An object mapping message types to handler functions
    */
-  subscribe = <T>(
-    type: QueueType,
-    handler: (message: T) => void | Promise<void>,
+  subscribe = (
+    handlers: Record<QueueType, (message: unknown) => void | Promise<void>>,
   ) => {
     logger.info("Starting event queue listener");
 
-    this.kv.listenQueue(async (queueMessage: QueueMessage<T>) => {
-      if (queueMessage.type !== type) {
+    this.kv.listenQueue(async (queueMessage: QueueMessage<unknown>) => {
+      const { type, data } = queueMessage;
+
+      const handler = handlers[type];
+
+      if (!handler) {
+        logger.warn(`No handler found for ${type} message`);
         return;
       }
 
       try {
         logger.info(`Processing ${type} message`);
-        await handler(queueMessage.data);
+        await handler(data);
       } catch (error) {
         logger.error(
           `Error processing ${type} message: ${

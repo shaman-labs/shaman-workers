@@ -1,3 +1,5 @@
+import { arbitrumSepolia } from "viem/chains";
+import * as viem from "viem";
 import { logger } from "../config/logger.ts";
 import { upload } from "../services/filebase.ts";
 import { getShaman } from "../services/shamans.ts";
@@ -11,6 +13,9 @@ import { JobState } from "../types/common.ts";
 import { SpellMessage } from "../types/queue.ts";
 import { publishSpell } from "./kv.ts";
 import { publishShamanMessage } from "./shaman.ts";
+import { ServerWalletClient } from "../services/privy.ts";
+import { apiClient, oxApiClient } from "../services/api.ts";
+import { publicClient } from "../services/evm.ts";
 
 export const publishSpellMessage = (message: SpellMessage) => {
   const { spellId } = message;
@@ -19,7 +24,7 @@ export const publishSpellMessage = (message: SpellMessage) => {
 };
 
 export const handleSpellMessage = async (msg: SpellMessage) => {
-  const { shamanId, spellId, context, nextSpellIndex, results = [] } = msg;
+  const { shamanId, spellId, nextSpellIndex, results = [] } = msg;
 
   const shaman = await getShaman(shamanId);
   const spell = shaman.shamanSpells.find((s) => s.spellId === spellId);
@@ -53,6 +58,32 @@ export const handleSpellMessage = async (msg: SpellMessage) => {
 
     if (spell.spellState === JobState.InProgress) {
       // Execute the spell
+      const walletClient = new ServerWalletClient(
+        shaman.shamanCreator,
+        arbitrumSepolia.id,
+      );
+
+      // Create base context for spell execution
+      const context = {
+        spellCreator: spell.spellCreator,
+        shamanCreator: shaman.shamanCreator,
+        previousResults: results // TODO: make this prettier
+          ?.map((r) => r.result ?? {})
+          ?.reduce(
+            (acc: Record<string, unknown>, curr) => {
+              if (typeof curr === "object" && curr !== null) {
+                return { ...acc, ...curr };
+              }
+              return acc;
+            },
+            {},
+          ),
+        apiClient,
+        oxApiClient,
+        publicClient,
+        walletClient,
+        viem,
+      };
       const codeResult = await executeSpell(spell, context);
 
       // Upload results
@@ -97,18 +128,10 @@ export const handleSpellMessage = async (msg: SpellMessage) => {
       // Otherwise, chain to the next spell
       const nextSpell = shaman.shamanSpells[nextSpellIndex];
 
-      // Update context with previous results
-      const nextContext = {
-        ...context,
-        previousResults: codeResult.result,
-        spellCreator: nextSpell.spellCreator,
-      };
-
       // Publish next spell
       await publishSpellMessage({
         shamanId,
         spellId: nextSpell.spellId,
-        context: nextContext,
         nextSpellIndex: nextSpellIndex + 1,
         results: updatedResults,
       });
