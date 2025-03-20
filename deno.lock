@@ -29,6 +29,9 @@
     "jsr:@std/streams@^1.0.9": "1.0.9",
     "npm:@filebase/sdk@^1.0.6": "1.0.6_@aws-sdk+client-s3@3.478.0",
     "npm:@privy-io/server-auth@^1.18.6": "1.18.6_viem@2.22.22__ws@8.18.0",
+    "npm:@types/node@*": "22.5.4",
+    "npm:@upstash/redis@*": "1.34.5",
+    "npm:@upstash/redis@^1.34.5": "1.34.5",
     "npm:uuid@^11.0.5": "11.0.5",
     "npm:viem@*": "2.22.22_ws@8.18.0",
     "npm:viem@^2.22.22": "2.22.22_ws@8.18.0"
@@ -1501,6 +1504,12 @@
         "@types/node@22.5.4"
       ]
     },
+    "@upstash/redis@1.34.5": {
+      "integrity": "sha512-ZsYy1AX89OWQIGGQcO8CDBoWyLuVuvuJdjLKfj5WYxnhzYBzYb8E26gbvLO1lVlhVBAIuFX/k0LNjtv7wn2bcQ==",
+      "dependencies": [
+        "crypto-js"
+      ]
+    },
     "@vascosantos/moving-average@1.1.0": {
       "integrity": "sha512-MVEJ4vWAPNbrGLjz7ITnHYg+YXZ6ijAqtH5/cHwSoCpbvuJ98aLXwFfPKAUfZpJMQR5uXB58UJajbY130IRF/w=="
     },
@@ -1699,6 +1708,9 @@
     },
     "commander@2.20.3": {
       "integrity": "sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ=="
+    },
+    "crypto-js@4.2.0": {
+      "integrity": "sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q=="
     },
     "datastore-core@9.2.9": {
       "integrity": "sha512-wraWTPsbtdE7FFaVo3pwPuTB/zXsgwGGAm8BgBYwYAuzZCTS0MfXmd/HH1vR9s0/NFFjOVmBkGiWCvKxZ+QjVw==",
@@ -2639,6 +2651,7 @@
       "jsr:@std/http@1",
       "npm:@filebase/sdk@^1.0.6",
       "npm:@privy-io/server-auth@^1.18.6",
+      "npm:@upstash/redis@^1.34.5",
       "npm:uuid@^11.0.5",
       "npm:viem@^2.22.22"
     ]

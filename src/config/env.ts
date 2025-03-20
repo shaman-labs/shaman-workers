@@ -54,3 +54,10 @@ assertEnv("S3_BUCKET", S3_BUCKET);
 export const OX_API_KEY = Deno.env.get("OX_API_KEY") ?? "";
 
 assertEnv("OX_API_KEY", OX_API_KEY);
+
+// Upstash Configuration
+export const UPSTASH_REDIS_URL = Deno.env.get("UPSTASH_REDIS_URL") ?? "";
+export const UPSTASH_REDIS_TOKEN = Deno.env.get("UPSTASH_REDIS_TOKEN") ?? "";
+
+assertEnv("UPSTASH_REDIS_URL", UPSTASH_REDIS_URL);
+assertEnv("UPSTASH_REDIS_TOKEN", UPSTASH_REDIS_TOKEN);
