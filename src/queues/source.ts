@@ -1,27 +1,19 @@
 import { Hex } from "viem";
 import { logger } from "../config/logger.ts";
-import { SourceMessage } from "../types/common.ts";
+import { publishSource } from "./kv.ts";
 import { processShamansBySource } from "../services/shamans.ts";
+import { SourceMessage } from "../types/queue.ts";
 
-const kv = await Deno.openKv();
-
-export const enqueueFromSource = (
+export const publishSourceMessage = (
   sourceId: Hex,
   context: Record<string, unknown>,
 ) => {
   const message: SourceMessage = { sourceId, context };
-  logger.info(`Enqueuing source message with sourceId: ${message.sourceId}`);
-
-  return kv.enqueue(message);
+  logger.info(`Publishing source trigger: ${message.sourceId}`);
+  return publishSource(message);
 };
 
-export const listenForSourceMessages = () => {
-  logger.info("Listening for source messages");
-  kv.listenQueue((msg: SourceMessage) => {
-    // TODO: this will break on large numbers of shamanIds
-    logger.info(`Received source message: ${msg.sourceId}`);
-    processShamansBySource(msg);
-  });
+export const handleSourceMessage = async (msg: SourceMessage) => {
+  logger.info(`Processing source trigger: ${msg.sourceId}`);
+  await processShamansBySource(msg);
 };
-
-export default kv;

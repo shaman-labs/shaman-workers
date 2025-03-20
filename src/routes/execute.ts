@@ -3,7 +3,7 @@ import { isHex } from "viem";
 import { logger } from "../config/logger.ts";
 import { ShamanRequest } from "../types/common.ts";
 import { Source, SourceIds } from "../types/source.ts";
-import { enqueueFromSource } from "../queues/source.ts";
+import { publishSourceMessage } from "../queues/source.ts";
 
 const app = new Hono();
 
@@ -16,7 +16,7 @@ app.post("/", async (c) => {
       return c.json({ error: "Missing shamanId in request body" }, 400);
     }
 
-    const result = await enqueueFromSource(SourceIds[Source.MANUAL], {
+    const result = await publishSourceMessage(SourceIds[Source.MANUAL], {
       shamanId: body.shamanId,
     });
 

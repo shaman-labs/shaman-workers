@@ -30,6 +30,7 @@
     "npm:@filebase/sdk@^1.0.6": "1.0.6_@aws-sdk+client-s3@3.478.0",
     "npm:@privy-io/server-auth@^1.18.6": "1.18.6_viem@2.22.22__ws@8.18.0",
     "npm:uuid@^11.0.5": "11.0.5",
+    "npm:viem@*": "2.22.22_ws@8.18.0",
     "npm:viem@^2.22.22": "2.22.22_ws@8.18.0"
   },
   "jsr": {
