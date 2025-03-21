@@ -1,4 +1,3 @@
-import { arbitrumSepolia } from "viem/chains";
 import * as viem from "viem";
 import { logger } from "../config/logger.ts";
 import { upload } from "../services/filebase.ts";
@@ -15,8 +14,9 @@ import { publishSpell } from "./kv.ts";
 import { publishShamanMessage } from "./shaman.ts";
 import { ServerWalletClient } from "../services/privy.ts";
 import { apiClient, oxApiClient } from "../services/api.ts";
-import { publicClient } from "../services/evm.ts";
+import { chain, publicClient } from "../services/evm.ts";
 import { getSecrets } from "../services/secrets.ts";
+import { PublicClient } from "viem";
 
 export const publishSpellMessage = (message: SpellMessage) => {
   const { spellId } = message;
@@ -61,7 +61,7 @@ export const handleSpellMessage = async (msg: SpellMessage) => {
       // Execute the spell
       const walletClient = new ServerWalletClient(
         shaman.shamanCreator,
-        arbitrumSepolia.id,
+        chain.id, // in the future, we will need to support multiple chains
       );
 
       // Get user secrets
@@ -85,7 +85,7 @@ export const handleSpellMessage = async (msg: SpellMessage) => {
         secrets,
         apiClient,
         oxApiClient,
-        publicClient,
+        publicClient: publicClient as PublicClient,
         walletClient,
         viem,
       };

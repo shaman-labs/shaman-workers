@@ -3,7 +3,7 @@ import { logger } from "./logger.ts";
 
 await load({ export: true });
 
-const assertEnv = (name: string, value: string) => {
+const assertEnv = (name: string, value: string | number) => {
   if (!value) {
     logger.error(`Missing ${name} environment variable`);
     Deno.exit(1);
@@ -31,15 +31,16 @@ assertEnv("PRIVY_AUTH_PRIVATE_KEY", PRIVY_AUTH_PRIVATE_KEY);
 
 // EVM Configuration
 export const OPERATOR_PRIVATE_KEY = Deno.env.get("OPERATOR_PRIVATE_KEY") ?? "";
-export const ARB_SEPOLIA_RPC_URL = Deno.env.get("ARB_SEPOLIA_RPC_URL") ??
+export const RPC_URL = Deno.env.get("RPC_URL") ??
   "https://arbitrum-sepolia-rpc.publicnode.com";
 export const WORLD_ADDRESS = Deno.env.get("WORLD_ADDRESS") ?? "";
+export const CHAIN_ID = Number(Deno.env.get("CHAIN_ID") ?? 421614);
 
 assertEnv("OPERATOR_PRIVATE_KEY", OPERATOR_PRIVATE_KEY);
 assertEnv("WORLD_ADDRESS", WORLD_ADDRESS);
-
 // Log EVM configuration
-logger.info(`Using ARB_SEPOLIA_RPC_URL: ${ARB_SEPOLIA_RPC_URL}`);
+logger.info(`Using RPC_URL: ${RPC_URL}`);
+logger.info(`Using CHAIN_ID: ${CHAIN_ID}`);
 
 // Filebase Configuration
 export const S3_KEY = Deno.env.get("S3_KEY") ?? "";
