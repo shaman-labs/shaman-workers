@@ -10,8 +10,7 @@ import {
 import { IPFS_GATEWAY } from "../config/env.ts";
 import { CodeExecutionResult, JobState } from "../types/common.ts";
 import { executeCode } from "./codeExecutor.ts";
-import { operatorAccount, publicClient } from "./evm.ts";
-import { arbitrumSepolia } from "viem/chains";
+import { chain, operatorAccount, publicClient } from "./evm.ts";
 import { ShamanEntity } from "../types/shaman.ts";
 
 export const getSpellName = (spellId: Hex) =>
@@ -97,7 +96,7 @@ export const enqueueSpellJob = async (
   const hash = await worldContract.write.enqueueSpellJob(
     [shaman.shamanId, spell.spellId, cost],
     {
-      chain: arbitrumSepolia,
+      chain,
       account: operatorAccount,
       nonce,
     },
@@ -136,7 +135,7 @@ export const startSpellJob = async (
   const hash = await worldContract.write.startSpellJob(
     [shaman.shamanId, spell.spellId],
     {
-      chain: arbitrumSepolia,
+      chain,
       account: operatorAccount,
       nonce,
     },
@@ -181,7 +180,7 @@ export const completeSpellJob = async (
   const hash = await worldContract.write.completeSpellJob(
     [shaman.shamanId, spell.spellId, cost, success, metadataHash],
     {
-      chain: arbitrumSepolia,
+      chain,
       account: operatorAccount,
       nonce,
     },

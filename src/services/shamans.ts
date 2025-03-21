@@ -1,5 +1,4 @@
 import { Hex } from "viem";
-import { arbitrumSepolia } from "viem/chains";
 import { logger } from "../config/logger.ts";
 import { worldContract } from "../mud/contract.ts";
 import { publishShamanMessage } from "../queues/shaman.ts";
@@ -13,7 +12,7 @@ import { SourceMessage } from "../types/queue.ts";
 import { ShamanEntity } from "../types/shaman.ts";
 import { Source, SourceIds } from "../types/source.ts";
 import { ShamanSpellEntity } from "../types/spell.ts";
-import { operatorAccount, publicClient } from "./evm.ts";
+import { chain, operatorAccount, publicClient } from "./evm.ts";
 import { upload } from "./filebase.ts";
 import {
   getShamanSpellMetadataHash,
@@ -116,7 +115,7 @@ export const enqueueShamanJob = async (shaman: ShamanEntity) => {
   const hash = await worldContract.write.enqueueShamanJob(
     [shaman.shamanId],
     {
-      chain: arbitrumSepolia,
+      chain,
       account: operatorAccount,
       nonce,
     },
@@ -149,7 +148,7 @@ export const startShamanJob = async (shaman: ShamanEntity) => {
   const hash = await worldContract.write.startShamanJob(
     [shaman.shamanId],
     {
-      chain: arbitrumSepolia,
+      chain,
       account: operatorAccount,
       nonce,
     },
@@ -195,7 +194,7 @@ export const completeShamanJob = async (
   const hash = await worldContract.write.completeShamanJob(
     [shaman.shamanId, success, metadataHash],
     {
-      chain: arbitrumSepolia,
+      chain,
       account: operatorAccount,
       nonce,
     },
