@@ -3,6 +3,7 @@ import ky from "https://esm.sh/ky";
 import { OX_API_KEY } from "../config/env.ts";
 
 export const oxApiClient = ky.create({
+  prefixUrl: "https://api.0x.org",
   headers: {
     "0x-api-key": OX_API_KEY,
   },
