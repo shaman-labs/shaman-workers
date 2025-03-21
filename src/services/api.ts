@@ -6,6 +6,7 @@ export const oxApiClient = ky.create({
   prefixUrl: "https://api.0x.org",
   headers: {
     "0x-api-key": OX_API_KEY,
+    "0x-version": "v2",
   },
 });
 
