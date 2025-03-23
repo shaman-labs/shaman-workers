@@ -86,7 +86,7 @@ export const enqueueSpellJob = async (
 
   await worldContract.simulate.enqueueSpellJob(
     [shaman.shamanId, spell.spellId, cost],
-    { account: operatorAccount.address },
+    { account: operatorAccount },
   );
 
   const nonce = await publicClient.getTransactionCount({
@@ -125,7 +125,7 @@ export const startSpellJob = async (
 
   await worldContract.simulate.startSpellJob(
     [shaman.shamanId, spell.spellId],
-    { account: operatorAccount.address },
+    { account: operatorAccount },
   );
 
   const nonce = await publicClient.getTransactionCount({
@@ -170,7 +170,7 @@ export const completeSpellJob = async (
 
   await worldContract.simulate.completeSpellJob(
     [shaman.shamanId, spell.spellId, cost, success, metadataHash],
-    { account: operatorAccount.address },
+    { account: operatorAccount },
   );
 
   const nonce = await publicClient.getTransactionCount({
