@@ -105,7 +105,7 @@ export const enqueueShamanJob = async (shaman: ShamanEntity) => {
 
   await worldContract.simulate.enqueueShamanJob(
     [shaman.shamanId],
-    { account: operatorAccount.address },
+    { account: operatorAccount },
   );
 
   const nonce = await publicClient.getTransactionCount({
@@ -138,7 +138,7 @@ export const startShamanJob = async (shaman: ShamanEntity) => {
 
   await worldContract.simulate.startShamanJob(
     [shaman.shamanId],
-    { account: operatorAccount.address },
+    { account: operatorAccount },
   );
 
   const nonce = await publicClient.getTransactionCount({
@@ -184,7 +184,7 @@ export const completeShamanJob = async (
   // Complete on-chain
   await worldContract.simulate.completeShamanJob(
     [shaman.shamanId, success, metadataHash],
-    { account: operatorAccount.address },
+    { account: operatorAccount },
   );
 
   const nonce = await publicClient.getTransactionCount({
