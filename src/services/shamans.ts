@@ -110,6 +110,7 @@ export const enqueueShamanJob = async (shaman: ShamanEntity) => {
 
   const nonce = await publicClient.getTransactionCount({
     address: operatorAccount.address,
+    blockTag: "pending",
   });
 
   const hash = await worldContract.write.enqueueShamanJob(
@@ -143,6 +144,7 @@ export const startShamanJob = async (shaman: ShamanEntity) => {
 
   const nonce = await publicClient.getTransactionCount({
     address: operatorAccount.address,
+    blockTag: "pending",
   });
 
   const hash = await worldContract.write.startShamanJob(
@@ -189,6 +191,7 @@ export const completeShamanJob = async (
 
   const nonce = await publicClient.getTransactionCount({
     address: operatorAccount.address,
+    blockTag: "pending",
   });
 
   const hash = await worldContract.write.completeShamanJob(

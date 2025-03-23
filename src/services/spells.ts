@@ -91,6 +91,7 @@ export const enqueueSpellJob = async (
 
   const nonce = await publicClient.getTransactionCount({
     address: operatorAccount.address,
+    blockTag: "pending",
   });
 
   const hash = await worldContract.write.enqueueSpellJob(
@@ -130,6 +131,7 @@ export const startSpellJob = async (
 
   const nonce = await publicClient.getTransactionCount({
     address: operatorAccount.address,
+    blockTag: "pending",
   });
 
   const hash = await worldContract.write.startSpellJob(
@@ -175,6 +177,7 @@ export const completeSpellJob = async (
 
   const nonce = await publicClient.getTransactionCount({
     address: operatorAccount.address,
+    blockTag: "pending",
   });
 
   const hash = await worldContract.write.completeSpellJob(
