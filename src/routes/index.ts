@@ -3,6 +3,7 @@ import { cors } from "@hono/hono/cors";
 import { PORT } from "../config/env.ts";
 import executeRoute from "./execute.ts";
 import sourceRoute from "./source.ts";
+import secretsRoute from "./secrets.ts";
 import { logger } from "../config/logger.ts";
 
 export const initializeRoutes = () => {
@@ -15,11 +16,12 @@ export const initializeRoutes = () => {
       origin: "*",
       allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       allowHeaders: ["Content-Type", "Authorization"],
-    }),
+    })
   );
 
   app.route("/execute", executeRoute);
   app.route("/source", sourceRoute);
+  app.route("/secrets", secretsRoute);
   app.get("/health", (c) => c.json({ status: "ok" }));
 
   Deno.serve({ port: PORT }, app.fetch);
