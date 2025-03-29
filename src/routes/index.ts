@@ -5,6 +5,7 @@ import executeRoute from "./execute.ts";
 import sourceRoute from "./source.ts";
 import secretsRoute from "./secrets.ts";
 import { logger } from "../config/logger.ts";
+import privyMiddleware from "../middlewares/privyMiddleware.ts";
 
 export const initializeRoutes = () => {
   logger.info("Initializing routes");
@@ -19,6 +20,7 @@ export const initializeRoutes = () => {
     })
   );
 
+  app.use(privyMiddleware);
   app.route("/execute", executeRoute);
   app.route("/source", sourceRoute);
   app.route("/secrets", secretsRoute);
