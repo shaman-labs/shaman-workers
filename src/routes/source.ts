@@ -2,15 +2,19 @@ import { Hono } from "@hono/hono";
 import { logger } from "../config/logger.ts";
 import { publishSourceMessage } from "../queues/source.ts";
 import { Hex } from "viem";
+import { User } from "../middlewares/privyMiddleware.ts";
 
 const app = new Hono();
 
 app.post("/:sourceId", async (c) => {
   try {
+    const variables = c.var as { user: User };
+    const user = variables.user;
+
     const body: Record<string, unknown> = await c.req.json();
     const result = await publishSourceMessage(
       c.req.param("sourceId") as Hex,
-      body,
+      body
     );
 
     return c.json({ result }, 200);
