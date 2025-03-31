@@ -1,7 +1,6 @@
 import { Hono } from "@hono/hono";
 import redis from "../services/upstash.ts";
 import { logger } from "../config/logger.ts";
-import { Hex } from "viem";
 import { User } from "../middlewares/privyMiddleware.ts";
 
 const app = new Hono();
@@ -9,12 +8,6 @@ const app = new Hono();
 interface SecretRequest {
   key: string;
   value: string;
-}
-
-interface WalletAccount {
-  type: string;
-  walletClientType: string;
-  address: Hex;
 }
 
 app.post("/", async (c) => {

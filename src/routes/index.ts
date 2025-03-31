@@ -14,9 +14,11 @@ export const initializeRoutes = () => {
   app.use(
     "*",
     cors({
-      origin: "*",
+      origin: ["http://localhost:3000", "https://beta.shaman.fun"],
       allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       allowHeaders: ["Content-Type", "Authorization"],
+      credentials: true,
+      exposeHeaders: ["Set-Cookie"],
     })
   );
 
