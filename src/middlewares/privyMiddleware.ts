@@ -1,6 +1,5 @@
 import { createMiddleware } from "@hono/hono/factory";
 import { privy } from "../services/privy.ts";
-import { getCookie } from "@hono/hono/cookie";
 import { logger } from "../config/logger.ts";
 import { WalletWithMetadata } from "@privy-io/server-auth";
 
@@ -14,9 +13,11 @@ const privyMiddleware = createMiddleware<{
     user: User;
   };
 }>(async (c, next) => {
-  const idToken = getCookie(c, "privy-id-token");
+  const authHeader = c.req.header("Authorization");
+  const idToken = authHeader?.replace("Bearer ", "");
+
   if (!idToken) {
-    logger.warn("Unauthorized request: missing privy-id-token");
+    logger.warn("Unauthorized request: missing Authorization header");
     return c.json({ error: "Unauthorized" }, 401);
   }
 
