@@ -14,7 +14,7 @@ app.post("/:sourceId", async (c) => {
     const body: Record<string, unknown> = await c.req.json();
     const result = await publishSourceMessage(
       c.req.param("sourceId") as Hex,
-      body
+      body,
     );
 
     return c.json({ result }, 200);

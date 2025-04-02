@@ -66,7 +66,7 @@ export const getShaman = async (shamanId: Hex) => {
       const spell = await getSpell(spellId);
       const spellMetadataHash = await getShamanSpellMetadataHash(
         shamanId,
-        spellId
+        spellId,
       );
       const spellMetadata = await getSpellMetadata(spellMetadataHash);
       const spellVersion = await getShamanSpellVersion(shamanId, spellId);
@@ -79,7 +79,7 @@ export const getShaman = async (shamanId: Hex) => {
         spellVersion,
         spellState,
       } as ShamanSpellEntity;
-    })
+    }),
   );
 
   return {
@@ -158,7 +158,7 @@ export const startShamanJob = async (shaman: ShamanEntity) => {
 export const completeShamanJob = async (
   shaman: ShamanEntity,
   results: CodeExecutionResult[],
-  success: boolean
+  success: boolean,
 ) => {
   if (!shaman.shamanActive) {
     throw new Error(`Shaman is not active: ${shaman.shamanId}`);
@@ -178,7 +178,7 @@ export const completeShamanJob = async (
   // Complete on-chain
   await worldContract.simulate.completeShamanJob(
     [shaman.shamanId, success, metadataHash],
-    { account: operatorAccount }
+    { account: operatorAccount },
   );
 
   const nonce = await publicClient.getTransactionCount({
@@ -192,7 +192,7 @@ export const completeShamanJob = async (
       chain,
       account: operatorAccount,
       nonce,
-    }
+    },
   );
 
   await publicClient.waitForTransactionReceipt({ hash });
@@ -204,7 +204,7 @@ export const completeShamanJob = async (
 
 // utils
 export const processShamansBySource = async (
-  msg: SourceMessage
+  msg: SourceMessage,
 ): Promise<void> => {
   try {
     const isManualSource = msg.sourceId === SourceIds[Source.MANUAL];
@@ -222,7 +222,7 @@ export const processShamansBySource = async (
 
     // Process all shamans in parallel
     logger.info(
-      `Processing ${shamans.length} shamans for source ${msg.sourceId}`
+      `Processing ${shamans.length} shamans for source ${msg.sourceId}`,
     );
     shamans.map((shaman) =>
       publishShamanMessage({
@@ -235,7 +235,7 @@ export const processShamansBySource = async (
     logger.error(
       `Error with source ${msg.sourceId}: ${
         error instanceof Error ? error.message : String(error)
-      }`
+      }`,
     );
   }
 };
