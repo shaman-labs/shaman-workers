@@ -22,6 +22,12 @@ export interface ShamanSpellEntity extends SpellEntity {
   spellMetadata: SpellMetadata;
 }
 
+export interface ShamanSpellEdgeEntity {
+  fromSpellId?: Hex;
+  toSpellId?: Hex;
+  metadata: unknown; // TODO: add type
+}
+
 export interface SpellContext {
   publicClient: PublicClient;
   walletClient: ServerWalletClient;

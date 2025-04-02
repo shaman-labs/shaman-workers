@@ -11,7 +11,7 @@ import {
 import { SourceMessage } from "../types/queue.ts";
 import { ShamanEntity } from "../types/shaman.ts";
 import { Source, SourceIds } from "../types/source.ts";
-import { ShamanSpellEntity } from "../types/spell.ts";
+import { ShamanSpellEdgeEntity, ShamanSpellEntity } from "../types/spell.ts";
 import { chain, operatorAccount, publicClient } from "./evm.ts";
 import { upload } from "./filebase.ts";
 import {
@@ -36,6 +36,8 @@ export const getShamanSourceIds = (shamanId: Hex) =>
   worldContract.read.getShamanSourceIds([shamanId]);
 export const getShamanIdsBySourceId = (sourceId: Hex) =>
   worldContract.read.getShamanIdsBySourceId([sourceId]);
+export const getShamanSpellEdges = (shamanId: Hex) =>
+  worldContract.read.getShamanSpellEdges([shamanId]);
 
 export const getShamansBySourceId = async (sourceId: Hex) => {
   const shamanIds = await getShamanIdsBySourceId(sourceId);
@@ -52,6 +54,7 @@ export const getShaman = async (shamanId: Hex) => {
     shamanActive,
     shamanSpellIds,
     shamanSourceIds,
+    shamanSpellEdges,
   ] = await Promise.all([
     getShamanCreator(shamanId),
     getShamanBalance(shamanId),
@@ -59,6 +62,7 @@ export const getShaman = async (shamanId: Hex) => {
     getShamanActive(shamanId),
     getShamanSpellIds(shamanId),
     getShamanSourceIds(shamanId),
+    getShamanSpellEdges(shamanId),
   ]);
 
   const shamanSpells = await Promise.all(
@@ -91,6 +95,9 @@ export const getShaman = async (shamanId: Hex) => {
     shamanSpellIds,
     shamanSourceIds,
     shamanSpells,
+    shamanSpellEdges: shamanSpellEdges?.map((edge) => ({
+      ...edge,
+    } as ShamanSpellEdgeEntity)),
   } as ShamanEntity;
 };
 

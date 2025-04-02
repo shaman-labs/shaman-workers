@@ -1,5 +1,5 @@
 import { Address, Hex } from "viem";
-import { ShamanSpellEntity } from "./spell.ts";
+import { ShamanSpellEdgeEntity, ShamanSpellEntity } from "./spell.ts";
 import { JobState } from "./common.ts";
 
 export interface ShamanEntity {
@@ -10,5 +10,7 @@ export interface ShamanEntity {
   shamanCreator: Address;
   shamanSpellIds: string[];
   shamanSourceIds: string[];
+  shamanSpellEdgeIds?: string[];
   shamanSpells: ShamanSpellEntity[];
+  shamanSpellEdges?: ShamanSpellEdgeEntity[];
 }
