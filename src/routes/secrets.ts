@@ -35,7 +35,7 @@ app.get("/", async (c) => {
     const user = variables.user;
 
     const keys = await redis.smembers(
-      `secret:${user.wallet.address.toLowerCase()}:keys`
+      `secret:${user.wallet.address.toLowerCase()}:keys`,
     );
 
     return c.json({ keys });

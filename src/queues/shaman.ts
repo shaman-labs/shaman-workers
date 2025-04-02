@@ -4,7 +4,7 @@ import {
   enqueueShamanJob,
   getShaman,
   startShamanJob,
-  startSpellChain,
+  startSpellPathExecution,
 } from "../services/shamans.ts";
 import { JobState } from "../types/common.ts";
 import { ShamanMessage } from "../types/queue.ts";
@@ -75,9 +75,11 @@ export const handleShamanMessage = async (msg: ShamanMessage) => {
         return;
       }
 
-      // Otherwise, start the spell chain
-      logger.info(`Starting spell chain for shaman ${shaman.shamanId}`);
-      await startSpellChain(shaman);
+      // Otherwise, start the spell path execution
+      logger.info(
+        `Starting spell path execution for shaman ${shaman.shamanId}`,
+      );
+      await startSpellPathExecution(shaman);
       return;
     }
 

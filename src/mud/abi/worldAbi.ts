@@ -1,42 +1,6 @@
 export const worldAbi = [
   {
     "type": "function",
-    "name": "addSourceToShaman",
-    "inputs": [
-      {
-        "name": "shamanId",
-        "type": "bytes32",
-        "internalType": "bytes32",
-      },
-      {
-        "name": "sourceId",
-        "type": "bytes32",
-        "internalType": "bytes32",
-      },
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable",
-  },
-  {
-    "type": "function",
-    "name": "addSpellToShaman",
-    "inputs": [
-      {
-        "name": "shamanId",
-        "type": "bytes32",
-        "internalType": "bytes32",
-      },
-      {
-        "name": "spellId",
-        "type": "bytes32",
-        "internalType": "bytes32",
-      },
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable",
-  },
-  {
-    "type": "function",
     "name": "batchCall",
     "inputs": [
       {
@@ -157,6 +121,32 @@ export const worldAbi = [
   },
   {
     "type": "function",
+    "name": "cancelShamanJob",
+    "inputs": [
+      {
+        "name": "shamanId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable",
+  },
+  {
+    "type": "function",
+    "name": "claimZug",
+    "inputs": [
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256",
+      },
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable",
+  },
+  {
+    "type": "function",
     "name": "completeShamanJob",
     "inputs": [
       {
@@ -216,24 +206,9 @@ export const worldAbi = [
     "name": "createShaman",
     "inputs": [
       {
-        "name": "balance",
-        "type": "uint256",
-        "internalType": "uint256",
-      },
-      {
         "name": "name",
         "type": "string",
         "internalType": "string",
-      },
-      {
-        "name": "spellIds",
-        "type": "bytes32[]",
-        "internalType": "bytes32[]",
-      },
-      {
-        "name": "sourceIds",
-        "type": "bytes32[]",
-        "internalType": "bytes32[]",
       },
       {
         "name": "metadata",
@@ -248,6 +223,11 @@ export const worldAbi = [
     "type": "function",
     "name": "createSource",
     "inputs": [
+      {
+        "name": "sourceType",
+        "type": "uint8",
+        "internalType": "uint8",
+      },
       {
         "name": "name",
         "type": "string",
@@ -777,25 +757,6 @@ export const worldAbi = [
   },
   {
     "type": "function",
-    "name": "getShamanIdsBySpellId",
-    "inputs": [
-      {
-        "name": "spellId",
-        "type": "bytes32",
-        "internalType": "bytes32",
-      },
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "bytes32[]",
-        "internalType": "bytes32[]",
-      },
-    ],
-    "stateMutability": "view",
-  },
-  {
-    "type": "function",
     "name": "getShamanMetadata",
     "inputs": [
       {
@@ -847,6 +808,47 @@ export const worldAbi = [
         "name": "",
         "type": "bytes32[]",
         "internalType": "bytes32[]",
+      },
+    ],
+    "stateMutability": "view",
+  },
+  {
+    "type": "function",
+    "name": "getShamanSpellEdges",
+    "inputs": [
+      {
+        "name": "shamanId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple[]",
+        "internalType": "struct SpellEdge[]",
+        "components": [
+          {
+            "name": "fromSpellId",
+            "type": "bytes32",
+            "internalType": "bytes32",
+          },
+          {
+            "name": "toSpellId",
+            "type": "bytes32",
+            "internalType": "bytes32",
+          },
+          {
+            "name": "createdAt",
+            "type": "uint256",
+            "internalType": "uint256",
+          },
+          {
+            "name": "metadata",
+            "type": "string",
+            "internalType": "string",
+          },
+        ],
       },
     ],
     "stateMutability": "view",
@@ -963,6 +965,120 @@ export const worldAbi = [
   },
   {
     "type": "function",
+    "name": "getSourceActive",
+    "inputs": [
+      {
+        "name": "sourceId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool",
+      },
+    ],
+    "stateMutability": "view",
+  },
+  {
+    "type": "function",
+    "name": "getSourceCreator",
+    "inputs": [
+      {
+        "name": "sourceId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address",
+      },
+    ],
+    "stateMutability": "view",
+  },
+  {
+    "type": "function",
+    "name": "getSourceMetadata",
+    "inputs": [
+      {
+        "name": "sourceId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "string",
+        "internalType": "string",
+      },
+    ],
+    "stateMutability": "view",
+  },
+  {
+    "type": "function",
+    "name": "getSourceName",
+    "inputs": [
+      {
+        "name": "sourceId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "string",
+        "internalType": "string",
+      },
+    ],
+    "stateMutability": "view",
+  },
+  {
+    "type": "function",
+    "name": "getSourceNonce",
+    "inputs": [
+      {
+        "name": "sourceId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256",
+      },
+    ],
+    "stateMutability": "view",
+  },
+  {
+    "type": "function",
+    "name": "getSourceType",
+    "inputs": [
+      {
+        "name": "sourceId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint8",
+        "internalType": "uint8",
+      },
+    ],
+    "stateMutability": "view",
+  },
+  {
+    "type": "function",
     "name": "getSpellCreator",
     "inputs": [
       {
@@ -1031,8 +1147,8 @@ export const worldAbi = [
     "outputs": [
       {
         "name": "",
-        "type": "uint32",
-        "internalType": "uint32",
+        "type": "uint256",
+        "internalType": "uint256",
       },
     ],
     "stateMutability": "view",
@@ -1048,8 +1164,8 @@ export const worldAbi = [
       },
       {
         "name": "version",
-        "type": "uint32",
-        "internalType": "uint32",
+        "type": "uint256",
+        "internalType": "uint256",
       },
     ],
     "outputs": [
@@ -1193,6 +1309,25 @@ export const worldAbi = [
     ],
     "outputs": [],
     "stateMutability": "nonpayable",
+  },
+  {
+    "type": "function",
+    "name": "isMember",
+    "inputs": [
+      {
+        "name": "member",
+        "type": "address",
+        "internalType": "address",
+      },
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool",
+      },
+    ],
+    "stateMutability": "view",
   },
   {
     "type": "function",
@@ -1471,42 +1606,6 @@ export const worldAbi = [
   },
   {
     "type": "function",
-    "name": "removeSourceFromShaman",
-    "inputs": [
-      {
-        "name": "shamanId",
-        "type": "bytes32",
-        "internalType": "bytes32",
-      },
-      {
-        "name": "sourceId",
-        "type": "bytes32",
-        "internalType": "bytes32",
-      },
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable",
-  },
-  {
-    "type": "function",
-    "name": "removeSpellFromShaman",
-    "inputs": [
-      {
-        "name": "shamanId",
-        "type": "bytes32",
-        "internalType": "bytes32",
-      },
-      {
-        "name": "spellId",
-        "type": "bytes32",
-        "internalType": "bytes32",
-      },
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable",
-  },
-  {
-    "type": "function",
     "name": "renounceOwnership",
     "inputs": [
       {
@@ -1531,6 +1630,19 @@ export const worldAbi = [
         "name": "grantee",
         "type": "address",
         "internalType": "address",
+      },
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable",
+  },
+  {
+    "type": "function",
+    "name": "rotateNonce",
+    "inputs": [
+      {
+        "name": "sourceId",
+        "type": "bytes32",
+        "internalType": "bytes32",
       },
     ],
     "outputs": [],
@@ -1627,6 +1739,19 @@ export const worldAbi = [
   },
   {
     "type": "function",
+    "name": "setMembers",
+    "inputs": [
+      {
+        "name": "members",
+        "type": "address[]",
+        "internalType": "address[]",
+      },
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable",
+  },
+  {
+    "type": "function",
     "name": "setRecord",
     "inputs": [
       {
@@ -1653,6 +1778,47 @@ export const worldAbi = [
         "name": "dynamicData",
         "type": "bytes",
         "internalType": "bytes",
+      },
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable",
+  },
+  {
+    "type": "function",
+    "name": "setShamanSpellVersion",
+    "inputs": [
+      {
+        "name": "shamanId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+      {
+        "name": "spellId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+      {
+        "name": "version",
+        "type": "uint256",
+        "internalType": "uint256",
+      },
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable",
+  },
+  {
+    "type": "function",
+    "name": "setSourceActive",
+    "inputs": [
+      {
+        "name": "sourceId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "internalType": "bool",
       },
     ],
     "outputs": [],
@@ -1965,6 +2131,24 @@ export const worldAbi = [
   },
   {
     "type": "function",
+    "name": "updateShamanSpellVersion",
+    "inputs": [
+      {
+        "name": "shamanId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+      {
+        "name": "spellId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable",
+  },
+  {
+    "type": "function",
     "name": "updateShamanStatus",
     "inputs": [
       {
@@ -1976,6 +2160,92 @@ export const worldAbi = [
         "name": "active",
         "type": "bool",
         "internalType": "bool",
+      },
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable",
+  },
+  {
+    "type": "function",
+    "name": "updateShamanWorkflow",
+    "inputs": [
+      {
+        "name": "shamanId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+      {
+        "name": "spellIds",
+        "type": "bytes32[]",
+        "internalType": "bytes32[]",
+      },
+      {
+        "name": "sourceIds",
+        "type": "bytes32[]",
+        "internalType": "bytes32[]",
+      },
+      {
+        "name": "spellEdges",
+        "type": "tuple[]",
+        "internalType": "struct SpellEdge[]",
+        "components": [
+          {
+            "name": "fromSpellId",
+            "type": "bytes32",
+            "internalType": "bytes32",
+          },
+          {
+            "name": "toSpellId",
+            "type": "bytes32",
+            "internalType": "bytes32",
+          },
+          {
+            "name": "createdAt",
+            "type": "uint256",
+            "internalType": "uint256",
+          },
+          {
+            "name": "metadata",
+            "type": "string",
+            "internalType": "string",
+          },
+        ],
+      },
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable",
+  },
+  {
+    "type": "function",
+    "name": "updateSourceMetadata",
+    "inputs": [
+      {
+        "name": "sourceId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+      {
+        "name": "metadata",
+        "type": "string",
+        "internalType": "string",
+      },
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable",
+  },
+  {
+    "type": "function",
+    "name": "updateSourceName",
+    "inputs": [
+      {
+        "name": "sourceId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "internalType": "string",
       },
     ],
     "outputs": [],
@@ -2016,6 +2286,30 @@ export const worldAbi = [
     ],
     "outputs": [],
     "stateMutability": "nonpayable",
+  },
+  {
+    "type": "function",
+    "name": "validateSignatureNonce",
+    "inputs": [
+      {
+        "name": "sourceId",
+        "type": "bytes32",
+        "internalType": "bytes32",
+      },
+      {
+        "name": "signature",
+        "type": "bytes",
+        "internalType": "bytes",
+      },
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool",
+      },
+    ],
+    "stateMutability": "view",
   },
   {
     "type": "function",

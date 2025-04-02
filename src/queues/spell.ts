@@ -25,10 +25,10 @@ export const publishSpellMessage = (message: SpellMessage) => {
 };
 
 export const handleSpellMessage = async (msg: SpellMessage) => {
-  const { shamanId, spellId, nextSpellIndex, results = [] } = msg;
+  const { spellPath, shamanId, spellId, nextSpellIndex, results = [] } = msg;
 
   const shaman = await getShaman(shamanId);
-  const spell = shaman.shamanSpells.find((s) => s.spellId === spellId);
+  const spell = spellPath.find((s) => s.spellId === spellId);
 
   if (!spell) {
     logger.error(`Spell not found: ${spellId}`);
@@ -120,7 +120,7 @@ export const handleSpellMessage = async (msg: SpellMessage) => {
       // If we're at the last spell, complete the shaman with success
       if (
         nextSpellIndex === undefined ||
-        nextSpellIndex >= shaman.shamanSpells.length
+        nextSpellIndex >= spellPath.length
       ) {
         await publishShamanMessage({
           shamanId,
@@ -131,10 +131,11 @@ export const handleSpellMessage = async (msg: SpellMessage) => {
       }
 
       // Otherwise, chain to the next spell
-      const nextSpell = shaman.shamanSpells[nextSpellIndex];
+      const nextSpell = spellPath[nextSpellIndex];
 
       // Publish next spell
       await publishSpellMessage({
+        spellPath,
         shamanId,
         spellId: nextSpell.spellId,
         nextSpellIndex: nextSpellIndex + 1,

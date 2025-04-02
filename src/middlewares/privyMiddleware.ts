@@ -27,7 +27,7 @@ const privyMiddleware = createMiddleware<{
 
   const embeddedWallet = user.linkedAccounts.find(
     (account) =>
-      account.type === "wallet" && account.walletClientType === "privy"
+      account.type === "wallet" && account.walletClientType === "privy",
   ) as WalletWithMetadata | undefined;
 
   if (!embeddedWallet) {
