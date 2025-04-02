@@ -1,4 +1,4 @@
-import { Hex } from "viem";
+import { Hex, zeroHash } from "viem";
 import { logger } from "../config/logger.ts";
 import { worldContract } from "../mud/contract.ts";
 import { publishShamanMessage } from "../queues/shaman.ts";
@@ -247,15 +247,101 @@ export const processShamansBySource = async (
   }
 };
 
-export const startSpellChain = (shaman: ShamanEntity) => {
+export const startSpellPathExecution = (shaman: ShamanEntity) => {
+  const spellPath = buildSpellPath(shaman);
   // Get the first spell
-  const firstSpell = shaman.shamanSpells[0];
+  const firstSpell = spellPath[0];
 
   // Publish spell message to begin execution
-  const hasMoreSpells = shaman.shamanSpells.length > 1;
+  const hasMoreSpells = spellPath.length > 1;
   return publishSpellMessage({
+    spellPath,
     shamanId: shaman.shamanId,
     spellId: firstSpell.spellId,
     nextSpellIndex: hasMoreSpells ? 1 : undefined,
   });
+};
+
+// build edges path
+// edges are defined with a fromSpellId and toSpellId
+// we can see this as directed acyclic graph (DAG)
+// https://en.wikipedia.org/wiki/Directed_acyclic_graph
+// we need to build the topological sort of the DAG
+// https://en.wikipedia.org/wiki/Topological_sorting
+
+export const buildSpellPath = (shaman: ShamanEntity) => {
+  // If there are no edges or only one spell, return spells in their current order
+  if (!shaman.shamanSpellEdges || shaman.shamanSpellEdges.length === 0) {
+    return shaman.shamanSpells;
+  }
+
+  // Create a map to store the graph (adjacency list)
+  const graph = new Map<Hex, Hex[]>();
+  // Track in-degree of each node for topological sort
+  const inDegree = new Map<Hex, number>();
+
+  // Initialize graph and in-degree for all spells
+  for (const spell of shaman.shamanSpells) {
+    graph.set(spell.spellId, []);
+    inDegree.set(spell.spellId, 0);
+  }
+
+  // Helper function to check if a spell id is valid
+  const isNotEmpty = (spellId: Hex | undefined): spellId is Hex => {
+    return !!spellId &&
+      spellId !== "0x" &&
+      spellId !== zeroHash;
+  };
+
+  // Build the graph and update in-degree
+  for (const edge of shaman.shamanSpellEdges) {
+    if (isNotEmpty(edge.fromSpellId) && isNotEmpty(edge.toSpellId)) {
+      // Add edge to graph
+      const neighbors = graph.get(edge.fromSpellId) || [];
+      neighbors.push(edge.toSpellId);
+      graph.set(edge.fromSpellId, neighbors);
+
+      // Increment in-degree for destination
+      inDegree.set(edge.toSpellId, (inDegree.get(edge.toSpellId) ?? 0) + 1);
+    }
+  }
+
+  // Find all nodes with in-degree 0 (starting points)
+  const queue: Hex[] = [];
+  for (const [spellId, degree] of inDegree.entries()) {
+    if (degree === 0) {
+      queue.push(spellId);
+    }
+  }
+
+  // Perform topological sort using BFS
+  const topologicalOrder: Hex[] = [];
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    topologicalOrder.push(current);
+
+    // Decrease in-degree of all neighbors
+    const neighbors = graph.get(current) || [];
+    for (const neighbor of neighbors) {
+      const newDegree = (inDegree.get(neighbor) || 0) - 1;
+      inDegree.set(neighbor, newDegree);
+
+      // If in-degree becomes 0, add to queue
+      if (newDegree === 0) {
+        queue.push(neighbor);
+      }
+    }
+  }
+
+  // Check if we've visited all spells (if not, there's a cycle)
+  if (topologicalOrder.length !== shaman.shamanSpells.length) {
+    throw new Error("Cycle detected in spell dependencies");
+  }
+
+  // Map spell IDs to actual spell objects and filter out any undefined values
+  return topologicalOrder
+    .map((spellId) =>
+      shaman.shamanSpells.find((spell) => spell.spellId === spellId)
+    )
+    .filter((spell): spell is ShamanSpellEntity => spell !== undefined);
 };

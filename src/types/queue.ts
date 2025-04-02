@@ -1,5 +1,6 @@
 import { Hex } from "npm:viem";
 import { CodeExecutionResult } from "./common.ts";
+import { ShamanSpellEntity } from "./spell.ts";
 
 export enum QueueType {
   SOURCE = "source",
@@ -13,6 +14,7 @@ export interface SourceMessage {
 }
 
 export interface SpellMessage {
+  spellPath: ShamanSpellEntity[];
   shamanId: Hex;
   spellId: Hex;
   nextSpellIndex?: number;
