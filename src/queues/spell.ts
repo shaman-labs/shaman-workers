@@ -14,62 +14,73 @@ import { publishSpell } from "./kv.ts";
 import { publishShamanMessage } from "./shaman.ts";
 import { ServerWalletClient } from "../services/privy.ts";
 import { apiClient, oxApiClient } from "../services/api.ts";
-import { chain, publicClient } from "../services/evm.ts";
+import { publicClient } from "../services/evm.ts";
 import { getSecrets } from "../services/secrets.ts";
 import { PublicClient } from "viem";
+import { getChainId } from "../utils/networks.ts";
 
 export const publishSpellMessage = (message: SpellMessage) => {
-  const { spellId } = message;
-  logger.info(`Publishing spell message for spell Id: ${spellId}`);
+  const { currentShamanSpellId } = message;
+  logger.info(`Publishing spell message for spell Id: ${currentShamanSpellId}`);
   return publishSpell(message);
 };
 
 export const handleSpellMessage = async (msg: SpellMessage) => {
-  const { spellPath, shamanId, spellId, nextSpellIndex, results = [] } = msg;
+  const {
+    shamanSpellPath,
+    shamanId,
+    currentShamanSpellId,
+    nextShamanSpellIndex,
+    results = [],
+  } = msg;
 
   const shaman = await getShaman(shamanId);
-  const spell = spellPath.find((s) => s.spellId === spellId);
+  const shamanSpell = shamanSpellPath.find((s) =>
+    s.shamanSpellId === currentShamanSpellId
+  );
 
-  if (!spell) {
-    logger.error(`Spell not found: ${spellId}`);
+  if (!shamanSpell) {
+    logger.error(`ShamanSpell not found: ${currentShamanSpellId}`);
     return;
   }
 
   logger.info(
-    `Processing spell: ${spell.spellId} (state: ${JobState[spell.spellState]})`,
+    `Processing ShamanSpell: ${shamanSpell.shamanSpellId} (state: ${
+      JobState[shamanSpell.spellState]
+    })`,
   );
 
   try {
     // Handle based on current state
-    if (spell.spellState === JobState.Idle) {
+    if (shamanSpell.spellState === JobState.Idle) {
       // Transition Idle -> Queue
-      await enqueueSpellJob(shaman, spell, 1n);
+      await enqueueSpellJob(shaman, shamanSpell, 1n);
       // Re-publish to continue processing
       await publishSpellMessage(msg);
       return;
     }
 
-    if (spell.spellState === JobState.Queue) {
+    if (shamanSpell.spellState === JobState.Queue) {
       // Transition Queue -> InProgress
-      await startSpellJob(shaman, spell);
+      await startSpellJob(shaman, shamanSpell);
       // Re-publish to continue processing
       await publishSpellMessage(msg);
       return;
     }
 
-    if (spell.spellState === JobState.InProgress) {
+    if (shamanSpell.spellState === JobState.InProgress) {
       // Execute the spell
       const walletClient = new ServerWalletClient(
         shaman.shamanCreator,
-        chain.id, // in the future, we will need to support multiple chains
+        getChainId(shamanSpell.chain), // multiple chains are possible
       );
 
       // Get user secrets
-      const secrets = await getSecrets(spell.spellCreator);
+      const secrets = await getSecrets(shamanSpell.spellCreator);
 
       // Create base context for spell execution
       const context = {
-        spellCreator: spell.spellCreator,
+        spellCreator: shamanSpell.spellCreator,
         shamanCreator: shaman.shamanCreator,
         previousResults: results // TODO: make this prettier
           ?.map((r) => r.result ?? {})
@@ -89,16 +100,18 @@ export const handleSpellMessage = async (msg: SpellMessage) => {
         walletClient,
         viem,
       };
-      const codeResult = await executeSpell(spell, context);
+      const codeResult = await executeSpell(shamanSpell, context);
 
       // Upload results
-      logger.info(`Uploading results for spell: ${spell.spellId}`);
+      logger.info(
+        `Uploading results for ShamanSpell: ${shamanSpell.shamanSpellId}`,
+      );
       const { cid: metadataHash } = await upload(codeResult);
 
       // Complete on chain
       await completeSpellJob(
         shaman,
-        spell,
+        shamanSpell,
         metadataHash,
         codeResult.success,
         1n,
@@ -119,8 +132,8 @@ export const handleSpellMessage = async (msg: SpellMessage) => {
 
       // If we're at the last spell, complete the shaman with success
       if (
-        nextSpellIndex === undefined ||
-        nextSpellIndex >= spellPath.length
+        nextShamanSpellIndex === undefined ||
+        nextShamanSpellIndex >= shamanSpellPath.length
       ) {
         await publishShamanMessage({
           shamanId,
@@ -131,27 +144,27 @@ export const handleSpellMessage = async (msg: SpellMessage) => {
       }
 
       // Otherwise, chain to the next spell
-      const nextSpell = spellPath[nextSpellIndex];
+      const nextSpell = shamanSpellPath[nextShamanSpellIndex];
 
       // Publish next spell
       await publishSpellMessage({
-        spellPath,
+        shamanSpellPath,
         shamanId,
-        spellId: nextSpell.spellId,
-        nextSpellIndex: nextSpellIndex + 1,
+        currentShamanSpellId: nextSpell.shamanSpellId,
+        nextShamanSpellIndex: nextShamanSpellIndex + 1,
         results: updatedResults,
       });
       return;
     }
 
     logger.warn(
-      `Spell ${spell.spellId} is in unhandled state: ${
-        JobState[spell.spellState]
+      `ShamanSpell ${shamanSpell.shamanSpellId} is in unhandled state: ${
+        JobState[shamanSpell.spellState]
       }`,
     );
   } catch (error) {
     logger.error(
-      `Error processing spell ${spell.spellId}: ${
+      `Error processing ShamanSpell ${shamanSpell.shamanSpellId}: ${
         error instanceof Error ? error.message : String(error)
       }`,
     );

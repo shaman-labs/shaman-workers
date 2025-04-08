@@ -17,15 +17,16 @@ export interface SpellEntity {
 }
 
 export interface ShamanSpellEntity extends SpellEntity {
+  shamanSpellId: Hex;
+  chain: string;
   spellVersion: bigint;
   spellState: JobState;
   spellMetadata: SpellMetadata;
 }
 
 export interface ShamanSpellEdgeEntity {
-  fromSpellId?: Hex;
-  toSpellId?: Hex;
-  metadata: unknown; // TODO: add type
+  fromShamanSpellId?: Hex;
+  toShamanSpellId?: Hex;
 }
 
 export interface SpellContext {

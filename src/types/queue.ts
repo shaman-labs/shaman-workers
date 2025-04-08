@@ -14,10 +14,10 @@ export interface SourceMessage {
 }
 
 export interface SpellMessage {
-  spellPath: ShamanSpellEntity[];
+  shamanSpellPath: ShamanSpellEntity[];
   shamanId: Hex;
-  spellId: Hex;
-  nextSpellIndex?: number;
+  currentShamanSpellId: Hex;
+  nextShamanSpellIndex?: number;
   results?: CodeExecutionResult[];
 }
 

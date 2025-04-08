@@ -173,12 +173,7 @@ export const worldAbi = [
     "name": "completeSpellJob",
     "inputs": [
       {
-        "name": "shamanId",
-        "type": "bytes32",
-        "internalType": "bytes32",
-      },
-      {
-        "name": "spellId",
+        "name": "shamanSpellId",
         "type": "bytes32",
         "internalType": "bytes32",
       },
@@ -327,12 +322,7 @@ export const worldAbi = [
     "name": "enqueueSpellJob",
     "inputs": [
       {
-        "name": "shamanId",
-        "type": "bytes32",
-        "internalType": "bytes32",
-      },
-      {
-        "name": "spellId",
+        "name": "shamanSpellId",
         "type": "bytes32",
         "internalType": "bytes32",
       },
@@ -826,27 +816,22 @@ export const worldAbi = [
       {
         "name": "",
         "type": "tuple[]",
-        "internalType": "struct SpellEdge[]",
+        "internalType": "struct ShamanSpellEdge[]",
         "components": [
           {
-            "name": "fromSpellId",
+            "name": "shamanSpellEdgeId",
             "type": "bytes32",
             "internalType": "bytes32",
           },
           {
-            "name": "toSpellId",
+            "name": "fromShamanSpellId",
             "type": "bytes32",
             "internalType": "bytes32",
           },
           {
-            "name": "createdAt",
-            "type": "uint256",
-            "internalType": "uint256",
-          },
-          {
-            "name": "metadata",
-            "type": "string",
-            "internalType": "string",
+            "name": "toShamanSpellId",
+            "type": "bytes32",
+            "internalType": "bytes32",
           },
         ],
       },
@@ -874,15 +859,10 @@ export const worldAbi = [
   },
   {
     "type": "function",
-    "name": "getShamanSpellMetadata",
+    "name": "getShamanSpells",
     "inputs": [
       {
         "name": "shamanId",
-        "type": "bytes32",
-        "internalType": "bytes32",
-      },
-      {
-        "name": "spellId",
         "type": "bytes32",
         "internalType": "bytes32",
       },
@@ -890,56 +870,45 @@ export const worldAbi = [
     "outputs": [
       {
         "name": "",
-        "type": "string",
-        "internalType": "string",
-      },
-    ],
-    "stateMutability": "view",
-  },
-  {
-    "type": "function",
-    "name": "getShamanSpellState",
-    "inputs": [
-      {
-        "name": "shamanId",
-        "type": "bytes32",
-        "internalType": "bytes32",
-      },
-      {
-        "name": "spellId",
-        "type": "bytes32",
-        "internalType": "bytes32",
-      },
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint8",
-        "internalType": "enum JobState",
-      },
-    ],
-    "stateMutability": "view",
-  },
-  {
-    "type": "function",
-    "name": "getShamanSpellVersion",
-    "inputs": [
-      {
-        "name": "shamanId",
-        "type": "bytes32",
-        "internalType": "bytes32",
-      },
-      {
-        "name": "spellId",
-        "type": "bytes32",
-        "internalType": "bytes32",
-      },
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256",
+        "type": "tuple[]",
+        "internalType": "struct ShamanSpell[]",
+        "components": [
+          {
+            "name": "shamanSpellId",
+            "type": "bytes32",
+            "internalType": "bytes32",
+          },
+          {
+            "name": "spellId",
+            "type": "bytes32",
+            "internalType": "bytes32",
+          },
+          {
+            "name": "shamanId",
+            "type": "bytes32",
+            "internalType": "bytes32",
+          },
+          {
+            "name": "version",
+            "type": "uint256",
+            "internalType": "uint256",
+          },
+          {
+            "name": "chain",
+            "type": "string",
+            "internalType": "string",
+          },
+          {
+            "name": "metadata",
+            "type": "string",
+            "internalType": "string",
+          },
+          {
+            "name": "state",
+            "type": "uint8",
+            "internalType": "enum JobState",
+          },
+        ],
       },
     ],
     "stateMutability": "view",
@@ -1793,7 +1762,7 @@ export const worldAbi = [
         "internalType": "bytes32",
       },
       {
-        "name": "spellId",
+        "name": "shamanSpellId",
         "type": "bytes32",
         "internalType": "bytes32",
       },
@@ -1941,12 +1910,7 @@ export const worldAbi = [
     "name": "startSpellJob",
     "inputs": [
       {
-        "name": "shamanId",
-        "type": "bytes32",
-        "internalType": "bytes32",
-      },
-      {
-        "name": "spellId",
+        "name": "shamanSpellId",
         "type": "bytes32",
         "internalType": "bytes32",
       },
@@ -2139,7 +2103,7 @@ export const worldAbi = [
         "internalType": "bytes32",
       },
       {
-        "name": "spellId",
+        "name": "shamanSpellId",
         "type": "bytes32",
         "internalType": "bytes32",
       },
@@ -2175,39 +2139,34 @@ export const worldAbi = [
         "internalType": "bytes32",
       },
       {
-        "name": "spellIds",
-        "type": "bytes32[]",
-        "internalType": "bytes32[]",
-      },
-      {
         "name": "sourceIds",
         "type": "bytes32[]",
         "internalType": "bytes32[]",
       },
       {
+        "name": "spellIds",
+        "type": "bytes32[]",
+        "internalType": "bytes32[]",
+      },
+      {
+        "name": "spellChains",
+        "type": "string[]",
+        "internalType": "string[]",
+      },
+      {
         "name": "spellEdges",
         "type": "tuple[]",
-        "internalType": "struct SpellEdge[]",
+        "internalType": "struct NewSpellEdge[]",
         "components": [
           {
-            "name": "fromSpellId",
-            "type": "bytes32",
-            "internalType": "bytes32",
-          },
-          {
-            "name": "toSpellId",
-            "type": "bytes32",
-            "internalType": "bytes32",
-          },
-          {
-            "name": "createdAt",
+            "name": "fromSpellIndex",
             "type": "uint256",
             "internalType": "uint256",
           },
           {
-            "name": "metadata",
-            "type": "string",
-            "internalType": "string",
+            "name": "toSpellIndex",
+            "type": "uint256",
+            "internalType": "uint256",
           },
         ],
       },
