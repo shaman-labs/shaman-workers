@@ -14,13 +14,7 @@ import { Source, SourceIds } from "../types/source.ts";
 import { ShamanSpellEdgeEntity, ShamanSpellEntity } from "../types/spell.ts";
 import { chain, operatorAccount, publicClient } from "./evm.ts";
 import { upload } from "./filebase.ts";
-import {
-  getShamanSpellMetadataHash,
-  getShamanSpellState,
-  getShamanSpellVersion,
-  getSpell,
-  getSpellMetadata,
-} from "./spells.ts";
+import { getSpell, getSpellMetadata } from "./spells.ts";
 
 export const getShamanCreator = (shamanId: Hex) =>
   worldContract.read.getShamanCreator([shamanId]);
@@ -38,6 +32,8 @@ export const getShamanIdsBySourceId = (sourceId: Hex) =>
   worldContract.read.getShamanIdsBySourceId([sourceId]);
 export const getShamanSpellEdges = (shamanId: Hex) =>
   worldContract.read.getShamanSpellEdges([shamanId]);
+export const getShamanSpells = (shamanId: Hex) =>
+  worldContract.read.getShamanSpells([shamanId]);
 
 export const getShamansBySourceId = async (sourceId: Hex) => {
   const shamanIds = await getShamanIdsBySourceId(sourceId);
@@ -54,6 +50,7 @@ export const getShaman = async (shamanId: Hex) => {
     shamanActive,
     shamanSpellIds,
     shamanSourceIds,
+    shamanSpells,
     shamanSpellEdges,
   ] = await Promise.all([
     getShamanCreator(shamanId),
@@ -62,26 +59,23 @@ export const getShaman = async (shamanId: Hex) => {
     getShamanActive(shamanId),
     getShamanSpellIds(shamanId),
     getShamanSourceIds(shamanId),
+    getShamanSpells(shamanId),
     getShamanSpellEdges(shamanId),
   ]);
 
-  const shamanSpells = await Promise.all(
-    shamanSpellIds.map(async (spellId) => {
-      const spell = await getSpell(spellId);
-      const spellMetadataHash = await getShamanSpellMetadataHash(
-        shamanId,
-        spellId,
-      );
-      const spellMetadata = await getSpellMetadata(spellMetadataHash);
-      const spellVersion = await getShamanSpellVersion(shamanId, spellId);
-      const spellState = await getShamanSpellState(shamanId, spellId);
+  const shamanSpellsEntities = await Promise.all(
+    shamanSpells.map(async (shamanSpell) => {
+      const spell = await getSpell(shamanSpell.spellId);
+      const spellMetadata = await getSpellMetadata(shamanSpell.metadata);
 
       return {
         ...spell,
         spellMetadata,
-        spellMetadataHash,
-        spellVersion,
-        spellState,
+        chain: shamanSpell.chain,
+        shamanSpellId: shamanSpell.shamanSpellId,
+        spellMetadataHash: shamanSpell.metadata,
+        spellVersion: shamanSpell.version,
+        spellState: shamanSpell.state,
       } as ShamanSpellEntity;
     }),
   );
@@ -94,7 +88,7 @@ export const getShaman = async (shamanId: Hex) => {
     shamanActive,
     shamanSpellIds,
     shamanSourceIds,
-    shamanSpells,
+    shamanSpells: shamanSpellsEntities,
     shamanSpellEdges: shamanSpellEdges?.map((edge) => ({
       ...edge,
     } as ShamanSpellEdgeEntity)),
@@ -248,17 +242,17 @@ export const processShamansBySource = async (
 };
 
 export const startSpellPathExecution = (shaman: ShamanEntity) => {
-  const spellPath = buildSpellPath(shaman);
+  const shamanSpellPath = buildSpellPath(shaman);
   // Get the first spell
-  const firstSpell = spellPath[0];
+  const firstShamanSpell = shamanSpellPath[0];
 
   // Publish spell message to begin execution
-  const hasMoreSpells = spellPath.length > 1;
+  const hasMoreSpells = shamanSpellPath.length > 1;
   return publishSpellMessage({
-    spellPath,
+    shamanSpellPath,
     shamanId: shaman.shamanId,
-    spellId: firstSpell.spellId,
-    nextSpellIndex: hasMoreSpells ? 1 : undefined,
+    currentShamanSpellId: firstShamanSpell.shamanSpellId,
+    nextShamanSpellIndex: hasMoreSpells ? 1 : undefined,
   });
 };
 
@@ -281,36 +275,41 @@ export const buildSpellPath = (shaman: ShamanEntity) => {
   const inDegree = new Map<Hex, number>();
 
   // Initialize graph and in-degree for all spells
-  for (const spell of shaman.shamanSpells) {
-    graph.set(spell.spellId, []);
-    inDegree.set(spell.spellId, 0);
+  for (const shamanSpell of shaman.shamanSpells) {
+    graph.set(shamanSpell.shamanSpellId, []);
+    inDegree.set(shamanSpell.shamanSpellId, 0);
   }
 
-  // Helper function to check if a spell id is valid
-  const isNotEmpty = (spellId: Hex | undefined): spellId is Hex => {
-    return !!spellId &&
-      spellId !== "0x" &&
-      spellId !== zeroHash;
+  // Helper function to check if a shaman spell id is valid
+  const isNotEmpty = (shamanSpellId: Hex | undefined): shamanSpellId is Hex => {
+    return !!shamanSpellId &&
+      shamanSpellId !== "0x" &&
+      shamanSpellId !== zeroHash;
   };
 
   // Build the graph and update in-degree
   for (const edge of shaman.shamanSpellEdges) {
-    if (isNotEmpty(edge.fromSpellId) && isNotEmpty(edge.toSpellId)) {
+    if (
+      isNotEmpty(edge.fromShamanSpellId) && isNotEmpty(edge.toShamanSpellId)
+    ) {
       // Add edge to graph
-      const neighbors = graph.get(edge.fromSpellId) || [];
-      neighbors.push(edge.toSpellId);
-      graph.set(edge.fromSpellId, neighbors);
+      const neighbors = graph.get(edge.fromShamanSpellId) || [];
+      neighbors.push(edge.toShamanSpellId);
+      graph.set(edge.fromShamanSpellId, neighbors);
 
       // Increment in-degree for destination
-      inDegree.set(edge.toSpellId, (inDegree.get(edge.toSpellId) ?? 0) + 1);
+      inDegree.set(
+        edge.toShamanSpellId,
+        (inDegree.get(edge.toShamanSpellId) ?? 0) + 1,
+      );
     }
   }
 
   // Find all nodes with in-degree 0 (starting points)
   const queue: Hex[] = [];
-  for (const [spellId, degree] of inDegree.entries()) {
+  for (const [shamanSpellId, degree] of inDegree.entries()) {
     if (degree === 0) {
-      queue.push(spellId);
+      queue.push(shamanSpellId);
     }
   }
 
@@ -340,8 +339,12 @@ export const buildSpellPath = (shaman: ShamanEntity) => {
 
   // Map spell IDs to actual spell objects and filter out any undefined values
   return topologicalOrder
-    .map((spellId) =>
-      shaman.shamanSpells.find((spell) => spell.spellId === spellId)
+    .map((shamanSpellId) =>
+      shaman.shamanSpells.find((shamanSpell) =>
+        shamanSpell.shamanSpellId === shamanSpellId
+      )
     )
-    .filter((spell): spell is ShamanSpellEntity => spell !== undefined);
+    .filter((shamanSpell): shamanSpell is ShamanSpellEntity =>
+      shamanSpell !== undefined
+    );
 };

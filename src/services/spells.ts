@@ -19,12 +19,6 @@ export const getSpellMetadataHash = (spellId: Hex) =>
   worldContract.read.getSpellMetadata([spellId]);
 export const getSpellCreator = (spellId: Hex) =>
   worldContract.read.getSpellCreator([spellId]);
-export const getShamanSpellMetadataHash = (shamanId: Hex, spellId: Hex) =>
-  worldContract.read.getShamanSpellMetadata([shamanId, spellId]);
-export const getShamanSpellVersion = (shamanId: Hex, spellId: Hex) =>
-  worldContract.read.getShamanSpellVersion([shamanId, spellId]);
-export const getShamanSpellState = (shamanId: Hex, spellId: Hex) =>
-  worldContract.read.getShamanSpellState([shamanId, spellId]);
 
 export const getSpell = async (spellId: Hex) => {
   logger.info(`Getting spell: ${spellId}`);
@@ -85,7 +79,7 @@ export const enqueueSpellJob = async (
   }
 
   await worldContract.simulate.enqueueSpellJob(
-    [shaman.shamanId, spell.spellId, cost],
+    [spell.shamanSpellId, cost],
     { account: operatorAccount },
   );
 
@@ -95,7 +89,7 @@ export const enqueueSpellJob = async (
   });
 
   const hash = await worldContract.write.enqueueSpellJob(
-    [shaman.shamanId, spell.spellId, cost],
+    [spell.shamanSpellId, cost],
     {
       chain,
       account: operatorAccount,
@@ -125,7 +119,7 @@ export const startSpellJob = async (
   }
 
   await worldContract.simulate.startSpellJob(
-    [shaman.shamanId, spell.spellId],
+    [spell.shamanSpellId],
     { account: operatorAccount },
   );
 
@@ -135,7 +129,7 @@ export const startSpellJob = async (
   });
 
   const hash = await worldContract.write.startSpellJob(
-    [shaman.shamanId, spell.spellId],
+    [spell.shamanSpellId],
     {
       chain,
       account: operatorAccount,
@@ -171,7 +165,7 @@ export const completeSpellJob = async (
   }
 
   await worldContract.simulate.completeSpellJob(
-    [shaman.shamanId, spell.spellId, cost, success, metadataHash],
+    [spell.shamanSpellId, cost, success, metadataHash],
     { account: operatorAccount },
   );
 
@@ -181,7 +175,7 @@ export const completeSpellJob = async (
   });
 
   const hash = await worldContract.write.completeSpellJob(
-    [shaman.shamanId, spell.spellId, cost, success, metadataHash],
+    [spell.shamanSpellId, cost, success, metadataHash],
     {
       chain,
       account: operatorAccount,
