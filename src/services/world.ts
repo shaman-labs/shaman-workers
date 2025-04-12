@@ -10,6 +10,8 @@ const RETRY_DELAY_MS = 2000;
 const DEFAULT_GAS_BUFFER = 1.2; // 20% buffer for gas estimation
 const DEFAULT_GAS_ESTIMATE = 100000n;
 
+type WritableFunctionName = keyof typeof worldContract.write;
+
 export const isNonceError = (error: unknown): boolean => {
   const errorMessage = String(error).toLowerCase();
   return (
@@ -60,9 +62,10 @@ export const checkGasAvailability = async (
   return true;
 };
 
-export const executeWrite = async (
-  functionName: keyof typeof worldContract.write,
-  args: Parameters<typeof worldContract.write[keyof typeof worldContract.write]>[0],
+export const executeWrite = async <T extends WritableFunctionName>(
+  functionName: T,
+  // @ts-ignore Type instantiation is excessively deep and possibly infinite
+  args: Parameters<typeof worldContract.write[T]>[0],
   options: { gasBuffer?: number } = {},
 ): Promise<{ hash: Hex; receipt: TransactionReceipt }> => {
   const gasBuffer = options.gasBuffer || DEFAULT_GAS_BUFFER;
@@ -79,6 +82,7 @@ export const executeWrite = async (
       let simulationResult;
       try {
         simulationResult = await worldContract.simulate[functionName](
+          // @ts-ignore Simulation is not typed
           args,
           {
             account: operatorAccount,
@@ -105,7 +109,8 @@ export const executeWrite = async (
         blockTag: "pending",
       });
 
-      const hash = await worldContract.write[functionNameString](args, {
+      // @ts-ignore Write has too many unions
+      const hash = await worldContract.write[functionName](args, {
         chain,
         account: operatorAccount,
         nonce,
