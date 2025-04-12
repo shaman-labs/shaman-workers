@@ -1,13 +1,3 @@
-import { Hex } from "viem";
-
-export interface GasInfo {
-  address: Hex;
-  balance: bigint;
-  gasPrice: bigint;
-  hasBalance: boolean;
-  formattedBalance: string;
-}
-
 export enum ContractErrorType {
   INSUFFICIENT_GAS = "INSUFFICIENT_GAS",
   NONCE_TOO_LOW = "NONCE_TOO_LOW",
