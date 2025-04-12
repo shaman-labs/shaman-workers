@@ -10,8 +10,8 @@ import {
 import { IPFS_GATEWAY } from "../config/env.ts";
 import { CodeExecutionResult, JobState } from "../types/common.ts";
 import { executeCode } from "./codeExecutor.ts";
-import { chain, operatorAccount, publicClient } from "./evm.ts";
 import { ShamanEntity } from "../types/shaman.ts";
+import { operator } from "./operator.ts";
 
 export const getSpellName = (spellId: Hex) =>
   worldContract.read.getSpellName([spellId]);
@@ -78,28 +78,13 @@ export const enqueueSpellJob = async (
     throw new Error(`Spell must be Idle: ${spell.spellId}`);
   }
 
-  await worldContract.simulate.enqueueSpellJob(
+  const { hash } = await operator.executeWrite(
+    worldContract,
+    "enqueueSpellJob",
     [spell.shamanSpellId, cost],
-    { account: operatorAccount },
   );
 
-  const nonce = await publicClient.getTransactionCount({
-    address: operatorAccount.address,
-    blockTag: "pending",
-  });
-
-  const hash = await worldContract.write.enqueueSpellJob(
-    [spell.shamanSpellId, cost],
-    {
-      chain,
-      account: operatorAccount,
-      nonce,
-    },
-  );
-
-  await publicClient.waitForTransactionReceipt({ hash });
   spell.spellState = JobState.Queue;
-
   logger.info(`Spell ${spell.spellId} transitioned to Queue (${hash})`);
   return hash;
 };
@@ -118,28 +103,13 @@ export const startSpellJob = async (
     throw new Error(`Spell must be Queue: ${spell.spellId}`);
   }
 
-  await worldContract.simulate.startSpellJob(
+  const { hash } = await operator.executeWrite(
+    worldContract,
+    "startSpellJob",
     [spell.shamanSpellId],
-    { account: operatorAccount },
   );
 
-  const nonce = await publicClient.getTransactionCount({
-    address: operatorAccount.address,
-    blockTag: "pending",
-  });
-
-  const hash = await worldContract.write.startSpellJob(
-    [spell.shamanSpellId],
-    {
-      chain,
-      account: operatorAccount,
-      nonce,
-    },
-  );
-
-  await publicClient.waitForTransactionReceipt({ hash });
   spell.spellState = JobState.InProgress;
-
   logger.info(`Spell ${spell.spellId} transitioned to InProgress (${hash})`);
   return hash;
 };
@@ -164,30 +134,14 @@ export const completeSpellJob = async (
     throw new Error(`Spell must be InProgress: ${spell.spellId}`);
   }
 
-  await worldContract.simulate.completeSpellJob(
+  const { hash } = await operator.executeWrite(
+    worldContract,
+    "completeSpellJob",
     [spell.shamanSpellId, cost, success, metadataHash],
-    { account: operatorAccount },
   );
 
-  const nonce = await publicClient.getTransactionCount({
-    address: operatorAccount.address,
-    blockTag: "pending",
-  });
-
-  const hash = await worldContract.write.completeSpellJob(
-    [spell.shamanSpellId, cost, success, metadataHash],
-    {
-      chain,
-      account: operatorAccount,
-      nonce,
-    },
-  );
-
-  await publicClient.waitForTransactionReceipt({ hash });
   spell.spellState = JobState.Idle;
-
   logger.info(`Spell ${spell.spellId} completed and back to Idle (${hash})`);
-
   return hash;
 };
 
