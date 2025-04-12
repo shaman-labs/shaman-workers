@@ -12,9 +12,9 @@ import { SourceMessage } from "../types/queue.ts";
 import { ShamanEntity } from "../types/shaman.ts";
 import { Source, SourceIds } from "../types/source.ts";
 import { ShamanSpellEdgeEntity, ShamanSpellEntity } from "../types/spell.ts";
-import { chain, operatorAccount, publicClient } from "./evm.ts";
 import { upload } from "./filebase.ts";
 import { getSpell, getSpellMetadata } from "./spells.ts";
+import { operator } from "./operator.ts";
 
 export const getShamanCreator = (shamanId: Hex) =>
   worldContract.read.getShamanCreator([shamanId]);
@@ -104,24 +104,13 @@ export const enqueueShamanJob = async (shaman: ShamanEntity) => {
     throw new Error(`Shaman is not idle: ${shaman.shamanId}`);
   }
 
-  await worldContract.simulate.enqueueShamanJob([shaman.shamanId], {
-    account: operatorAccount,
-  });
+  const { hash } = await operator.executeWrite(
+    worldContract,
+    "enqueueShamanJob",
+    [shaman.shamanId],
+  );
 
-  const nonce = await publicClient.getTransactionCount({
-    address: operatorAccount.address,
-    blockTag: "pending",
-  });
-
-  const hash = await worldContract.write.enqueueShamanJob([shaman.shamanId], {
-    chain,
-    account: operatorAccount,
-    nonce,
-  });
-
-  await publicClient.waitForTransactionReceipt({ hash });
   shaman.shamanState = JobState.Queue;
-
   logger.info(`Shaman ${shaman.shamanId} transitioned to Queue (${hash})`);
   return hash;
 };
@@ -134,24 +123,13 @@ export const startShamanJob = async (shaman: ShamanEntity) => {
     throw new Error(`Shaman is not in queue: ${shaman.shamanId}`);
   }
 
-  await worldContract.simulate.startShamanJob([shaman.shamanId], {
-    account: operatorAccount,
-  });
+  const { hash } = await operator.executeWrite(
+    worldContract,
+    "startShamanJob",
+    [shaman.shamanId],
+  );
 
-  const nonce = await publicClient.getTransactionCount({
-    address: operatorAccount.address,
-    blockTag: "pending",
-  });
-
-  const hash = await worldContract.write.startShamanJob([shaman.shamanId], {
-    chain,
-    account: operatorAccount,
-    nonce,
-  });
-
-  await publicClient.waitForTransactionReceipt({ hash });
   shaman.shamanState = JobState.InProgress;
-
   logger.info(`Shaman ${shaman.shamanId} transitioned to InProgress (${hash})`);
   return hash;
 };
@@ -176,29 +154,13 @@ export const completeShamanJob = async (
   const { cid: metadataHash } = await upload(result);
   logger.info(`Results stored with CID: ${metadataHash}`);
 
-  // Complete on-chain
-  await worldContract.simulate.completeShamanJob(
+  const { hash } = await operator.executeWrite(
+    worldContract,
+    "completeShamanJob",
     [shaman.shamanId, success, metadataHash],
-    { account: operatorAccount },
   );
 
-  const nonce = await publicClient.getTransactionCount({
-    address: operatorAccount.address,
-    blockTag: "pending",
-  });
-
-  const hash = await worldContract.write.completeShamanJob(
-    [shaman.shamanId, success, metadataHash],
-    {
-      chain,
-      account: operatorAccount,
-      nonce,
-    },
-  );
-
-  await publicClient.waitForTransactionReceipt({ hash });
   shaman.shamanState = JobState.Idle;
-
   logger.info(`Shaman ${shaman.shamanId} completed and back to Idle (${hash})`);
   return hash;
 };
