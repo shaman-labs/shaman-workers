@@ -12,16 +12,6 @@ const DEFAULT_GAS_ESTIMATE = 100000n;
 
 type WritableFunctionName = keyof typeof worldContract.write;
 
-export const isNonceError = (error: unknown): boolean => {
-  const errorMessage = String(error).toLowerCase();
-  return (
-    errorMessage.includes("nonce too low") ||
-    errorMessage.includes("nonce too high") ||
-    errorMessage.includes("nonce conflict") ||
-    errorMessage.includes("replacement transaction underpriced")
-  );
-};
-
 export const getGasBalance = async (): Promise<GasInfo> => {
   const balance = await publicClient.getBalance({
     address: operatorAccount.address,
@@ -145,25 +135,10 @@ export const executeWrite = async <T extends WritableFunctionName>(
         }
       }
 
-      // if the error is related to nonce issues, retry
-      if (isNonceError(error)) {
-        logger.warn(`Nonce error detected, retrying: ${String(error)}`);
+      logger.warn(`Error: ${String(error)}`);
+      logger.info(`Retrying in ${RETRY_DELAY_MS * attempts}ms`);
 
-        // for nonce errors, introduce a delay to allow pending transactions to clear
-        await setTimeout(RETRY_DELAY_MS * attempts);
-        continue;
-      }
-
-      // for other errors, rethrow
-      if (error instanceof ContractError) {
-        throw error;
-      } else {
-        throw new ContractError(
-          String(error),
-          ContractErrorType.UNKNOWN,
-          error,
-        );
-      }
+      await setTimeout(RETRY_DELAY_MS * attempts);
     }
   }
 
