@@ -1,4 +1,4 @@
-import { Hex, TransactionReceipt } from "viem";
+import { formatEther, Hex, TransactionReceipt } from "viem";
 import { chain, operatorAccount, publicClient } from "./evm.ts";
 import { logger } from "../config/logger.ts";
 import { setTimeout } from "node:timers/promises";
@@ -32,7 +32,7 @@ export class OperatorService {
       balance,
       gasPrice,
       hasBalance: balance > 0n,
-      formattedBalance: `${balance} wei (${Number(balance) / 1e18} ETH)`,
+      formattedBalance: `${balance} wei (${formatEther(balance)} ETH)`,
     };
   }
 
@@ -65,27 +65,28 @@ export class OperatorService {
     },
   >(
     contract: T,
-    functionName: string,
+    functionName: keyof T["write"],
     args: unknown[],
     options: { gasBuffer?: number } = {},
   ): Promise<{ hash: Hex; receipt: TransactionReceipt }> {
     const gasBuffer = options.gasBuffer || DEFAULT_GAS_BUFFER;
+    const functionNameString = String(functionName);
     let attempts = 0;
 
     while (attempts < MAX_RETRIES) {
       try {
         attempts++;
         logger.info(
-          `Executing contract write: ${functionName} (attempt ${attempts}/${MAX_RETRIES})`,
+          `Executing contract write: ${functionNameString} (attempt ${attempts}/${MAX_RETRIES})`,
         );
 
         let simulationResult;
         try {
-          simulationResult = await contract.simulate[functionName](args, {
+          simulationResult = await contract.simulate[functionNameString](args, {
             account: operatorAccount,
           });
         } catch (simError) {
-          const errorMsg = `Simulation failed for ${functionName}: ${
+          const errorMsg = `Simulation failed for ${functionNameString}: ${
             String(simError)
           }`;
           logger.error(errorMsg);
@@ -105,7 +106,7 @@ export class OperatorService {
           blockTag: "pending",
         });
 
-        const hash = await contract.write[functionName](args, {
+        const hash = await contract.write[functionNameString](args, {
           chain,
           account: operatorAccount,
           nonce,
