@@ -14,7 +14,7 @@ import { Source, SourceIds } from "../types/source.ts";
 import { ShamanSpellEdgeEntity, ShamanSpellEntity } from "../types/spell.ts";
 import { upload } from "./filebase.ts";
 import { getSpell, getSpellMetadata } from "./spells.ts";
-import { operator } from "./operator.ts";
+import { executeWrite } from "./world.ts";
 
 export const getShamanCreator = (shamanId: Hex) =>
   worldContract.read.getShamanCreator([shamanId]);
@@ -104,8 +104,7 @@ export const enqueueShamanJob = async (shaman: ShamanEntity) => {
     throw new Error(`Shaman is not idle: ${shaman.shamanId}`);
   }
 
-  const { hash } = await operator.executeWrite(
-    worldContract,
+  const { hash } = await executeWrite(
     "enqueueShamanJob",
     [shaman.shamanId],
   );
@@ -123,8 +122,7 @@ export const startShamanJob = async (shaman: ShamanEntity) => {
     throw new Error(`Shaman is not in queue: ${shaman.shamanId}`);
   }
 
-  const { hash } = await operator.executeWrite(
-    worldContract,
+  const { hash } = await executeWrite(
     "startShamanJob",
     [shaman.shamanId],
   );
@@ -154,8 +152,7 @@ export const completeShamanJob = async (
   const { cid: metadataHash } = await upload(result);
   logger.info(`Results stored with CID: ${metadataHash}`);
 
-  const { hash } = await operator.executeWrite(
-    worldContract,
+  const { hash } = await executeWrite(
     "completeShamanJob",
     [shaman.shamanId, success, metadataHash],
   );

@@ -11,7 +11,7 @@ import { IPFS_GATEWAY } from "../config/env.ts";
 import { CodeExecutionResult, JobState } from "../types/common.ts";
 import { executeCode } from "./codeExecutor.ts";
 import { ShamanEntity } from "../types/shaman.ts";
-import { operator } from "./operator.ts";
+import { executeWrite } from "./world.ts";
 
 export const getSpellName = (spellId: Hex) =>
   worldContract.read.getSpellName([spellId]);
@@ -78,8 +78,7 @@ export const enqueueSpellJob = async (
     throw new Error(`Spell must be Idle: ${spell.spellId}`);
   }
 
-  const { hash } = await operator.executeWrite(
-    worldContract,
+  const { hash } = await executeWrite(
     "enqueueSpellJob",
     [spell.shamanSpellId, cost],
   );
@@ -103,8 +102,7 @@ export const startSpellJob = async (
     throw new Error(`Spell must be Queue: ${spell.spellId}`);
   }
 
-  const { hash } = await operator.executeWrite(
-    worldContract,
+  const { hash } = await executeWrite(
     "startSpellJob",
     [spell.shamanSpellId],
   );
@@ -134,8 +132,7 @@ export const completeSpellJob = async (
     throw new Error(`Spell must be InProgress: ${spell.spellId}`);
   }
 
-  const { hash } = await operator.executeWrite(
-    worldContract,
+  const { hash } = await executeWrite(
     "completeSpellJob",
     [spell.shamanSpellId, cost, success, metadataHash],
   );
