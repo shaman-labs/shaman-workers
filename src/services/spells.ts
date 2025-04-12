@@ -11,7 +11,8 @@ import { IPFS_GATEWAY } from "../config/env.ts";
 import { CodeExecutionResult, JobState } from "../types/common.ts";
 import { executeCode } from "./codeExecutor.ts";
 import { ShamanEntity } from "../types/shaman.ts";
-import { executeWrite } from "./world.ts";
+import { safeWrite } from "./operator.ts";
+import { chain, operatorAccount, publicClient } from "./evm.ts";
 
 export const getSpellName = (spellId: Hex) =>
   worldContract.read.getSpellName([spellId]);
@@ -78,10 +79,23 @@ export const enqueueSpellJob = async (
     throw new Error(`Spell must be Idle: ${spell.spellId}`);
   }
 
-  const { hash } = await executeWrite(
-    "enqueueSpellJob",
-    [spell.shamanSpellId, cost],
-  );
+  const { hash } = await safeWrite(async () => {
+    await worldContract.simulate.enqueueSpellJob([spell.shamanSpellId, cost], {
+      account: operatorAccount,
+    });
+
+    const hash = await worldContract.write.enqueueSpellJob([
+      spell.shamanSpellId,
+      cost,
+    ], {
+      chain,
+      account: operatorAccount,
+    });
+
+    await publicClient.waitForTransactionReceipt({ hash });
+
+    return { hash };
+  });
 
   spell.spellState = JobState.Queue;
   logger.info(`Spell ${spell.spellId} transitioned to Queue (${hash})`);
@@ -102,10 +116,22 @@ export const startSpellJob = async (
     throw new Error(`Spell must be Queue: ${spell.spellId}`);
   }
 
-  const { hash } = await executeWrite(
-    "startSpellJob",
-    [spell.shamanSpellId],
-  );
+  const { hash } = await safeWrite(async () => {
+    await worldContract.simulate.startSpellJob([spell.shamanSpellId], {
+      account: operatorAccount,
+    });
+
+    const hash = await worldContract.write.startSpellJob([
+      spell.shamanSpellId,
+    ], {
+      chain,
+      account: operatorAccount,
+    });
+
+    await publicClient.waitForTransactionReceipt({ hash });
+
+    return { hash };
+  });
 
   spell.spellState = JobState.InProgress;
   logger.info(`Spell ${spell.spellId} transitioned to InProgress (${hash})`);
@@ -132,10 +158,30 @@ export const completeSpellJob = async (
     throw new Error(`Spell must be InProgress: ${spell.spellId}`);
   }
 
-  const { hash } = await executeWrite(
-    "completeSpellJob",
-    [spell.shamanSpellId, cost, success, metadataHash],
-  );
+  const { hash } = await safeWrite(async () => {
+    await worldContract.simulate.completeSpellJob([
+      spell.shamanSpellId,
+      cost,
+      success,
+      metadataHash,
+    ], {
+      account: operatorAccount,
+    });
+
+    const hash = await worldContract.write.completeSpellJob([
+      spell.shamanSpellId,
+      cost,
+      success,
+      metadataHash,
+    ], {
+      chain,
+      account: operatorAccount,
+    });
+
+    await publicClient.waitForTransactionReceipt({ hash });
+
+    return { hash };
+  });
 
   spell.spellState = JobState.Idle;
   logger.info(`Spell ${spell.spellId} completed and back to Idle (${hash})`);

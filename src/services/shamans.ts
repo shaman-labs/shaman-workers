@@ -14,7 +14,8 @@ import { Source, SourceIds } from "../types/source.ts";
 import { ShamanSpellEdgeEntity, ShamanSpellEntity } from "../types/spell.ts";
 import { upload } from "./filebase.ts";
 import { getSpell, getSpellMetadata } from "./spells.ts";
-import { executeWrite } from "./world.ts";
+import { chain, operatorAccount, publicClient } from "./evm.ts";
+import { safeWrite } from "./operator.ts";
 
 export const getShamanCreator = (shamanId: Hex) =>
   worldContract.read.getShamanCreator([shamanId]);
@@ -104,10 +105,20 @@ export const enqueueShamanJob = async (shaman: ShamanEntity) => {
     throw new Error(`Shaman is not idle: ${shaman.shamanId}`);
   }
 
-  const { hash } = await executeWrite(
-    "enqueueShamanJob",
-    [shaman.shamanId],
-  );
+  const { hash } = await safeWrite(async () => {
+    await worldContract.simulate.enqueueShamanJob([shaman.shamanId], {
+      account: operatorAccount,
+    });
+
+    const hash = await worldContract.write.enqueueShamanJob([shaman.shamanId], {
+      chain,
+      account: operatorAccount,
+    });
+
+    await publicClient.waitForTransactionReceipt({ hash });
+
+    return { hash };
+  });
 
   shaman.shamanState = JobState.Queue;
   logger.info(`Shaman ${shaman.shamanId} transitioned to Queue (${hash})`);
@@ -122,10 +133,20 @@ export const startShamanJob = async (shaman: ShamanEntity) => {
     throw new Error(`Shaman is not in queue: ${shaman.shamanId}`);
   }
 
-  const { hash } = await executeWrite(
-    "startShamanJob",
-    [shaman.shamanId],
-  );
+  const { hash } = await safeWrite(async () => {
+    await worldContract.simulate.startShamanJob([shaman.shamanId], {
+      account: operatorAccount,
+    });
+
+    const hash = await worldContract.write.startShamanJob([shaman.shamanId], {
+      chain,
+      account: operatorAccount,
+    });
+
+    await publicClient.waitForTransactionReceipt({ hash });
+
+    return { hash };
+  });
 
   shaman.shamanState = JobState.InProgress;
   logger.info(`Shaman ${shaman.shamanId} transitioned to InProgress (${hash})`);
@@ -152,10 +173,28 @@ export const completeShamanJob = async (
   const { cid: metadataHash } = await upload(result);
   logger.info(`Results stored with CID: ${metadataHash}`);
 
-  const { hash } = await executeWrite(
-    "completeShamanJob",
-    [shaman.shamanId, success, metadataHash],
-  );
+  const { hash } = await safeWrite(async () => {
+    await worldContract.simulate.completeShamanJob([
+      shaman.shamanId,
+      success,
+      metadataHash,
+    ], {
+      account: operatorAccount,
+    });
+
+    const hash = await worldContract.write.completeShamanJob([
+      shaman.shamanId,
+      success,
+      metadataHash,
+    ], {
+      chain,
+      account: operatorAccount,
+    });
+
+    await publicClient.waitForTransactionReceipt({ hash });
+
+    return { hash };
+  });
 
   shaman.shamanState = JobState.Idle;
   logger.info(`Shaman ${shaman.shamanId} completed and back to Idle (${hash})`);
